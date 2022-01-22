@@ -2,10 +2,10 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import sys
 
 driver = webdriver.Chrome("/usr/bin/chromedriver")
-# TODO: Pass the department as a parameter from the C++ main file, use "update" command
-driver.get("https://registrar.ucla.edu/academics/course-descriptions?search=Mathematics")
+driver.get("https://registrar.ucla.edu/academics/course-descriptions?search=" + ' '.join(sys.argv[1:]))
 # Defining some macros
 lowerDivPrefix = "//div[starts-with(@id, 'lower-division-courses')]/div[@class='course-record']"
 upperDivPrefix = "//div[starts-with(@id, 'upper-division-courses')]/div[@class='course-record']"

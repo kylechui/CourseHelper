@@ -55,6 +55,7 @@ void printHelpMessage() {
         { "add [course]", "Adds course to the courses database" },
         { "take [course]", "Adds course to the list of taken courses" },
         { "info [ID]", "Shows information about a given course ID" },
+        { "update [department]", "Updates course information for a given department" },
     };
     for (auto& [cmd, desc] : helpMessage) {
         std::cout << std::left << std::setw(15) << cmd << ' ' << desc << std::endl;
@@ -64,7 +65,6 @@ void printHelpMessage() {
 int main() {
     // Define input codes to denote various actions
     enum inputCode {
-        ADD,
         AVAILABLE,
         EXIT,
         HELP,
@@ -72,10 +72,10 @@ int main() {
         LIST,
         REMOVE,
         TAKE,
+        UPDATE,
     };
     // Input table that will validate inputs from the user, returns input codes
     const std::unordered_map<std::string, int> validInputs = {
-        { "add", ADD },
         { "available", AVAILABLE },
         { "exit", EXIT },
         { "help", HELP },
@@ -83,10 +83,12 @@ int main() {
         { "list", LIST },
         { "remove", REMOVE },
         { "take", TAKE },
+        { "update", UPDATE },
     };
     // Load in the user info 
     User user("user.txt");
-    // TODO: Load in courses info from database
+    // TODO: Load in courses info from *all* database files
+    // Format database files [DEPT]_[IDs|descriptions].txt
 
     std::string input;
     while (getline(std::cin, input)) {
@@ -99,9 +101,8 @@ int main() {
         }
         // Handle valid commands
         switch (validInputs.at(cmd)) {
-            case ADD:
-                break;
             case AVAILABLE:
+                // TODO: Add code to list all available classes based on DAG
                 break;
             case EXIT:
                 return 0;
@@ -109,6 +110,8 @@ int main() {
                 printHelpMessage();
                 break;
             case INFO:
+                // TODO: Add code that returns basic information about a given class,
+                // including missing pre-reqs (if any)
                 break;
             case LIST:
                 user.printTakenCourses();
@@ -122,6 +125,9 @@ int main() {
                 for (const std::string& course : args) {
                     user.removeCourse(course);
                 }
+                break;
+            case UPDATE:
+                std::system(("python3 ./scraper.py " + args[0]).c_str());
                 break;
         }
     }
