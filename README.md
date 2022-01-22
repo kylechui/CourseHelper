@@ -16,14 +16,13 @@ interactions.
 WIP
 
 ## Commands
-* `help`: Shows this list of all commands
-* `exit`: Exits the program
-* `available`: Shows list of courses that are currently available
-* `list`: Shows list of courses that have already been taken
-* `add [course]`: Adds course to the courses database
-* `take [course]`: Adds course to the list of taken courses
-* `info [ID]`: Shows information about a given course ID
-* `update [department]`: Updates course information for a given department
+- [X] `help`: Shows this list of all commands
+- [X] `exit`: Exits the program
+- [ ] `available`: Shows list of courses that are currently available
+- [X] `list`: Shows list of courses that have already been taken
+- [X] `take [course]`: Adds course to the list of taken courses
+- [ ] `info [ID]`: Shows information about a given course ID
+- [X] `update [department]`: Updates course information for a given department
 
 ## TODO/Future Ideas
 - [X] Add user information file that contains list of completed courses
