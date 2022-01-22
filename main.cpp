@@ -2,6 +2,21 @@
 #include "Course.hpp"
 #include "User.hpp"
 
+void trim(std::string& s) {
+    int i = 0;
+    while (i < s.size() && s[i] == ' ') {
+        i++;
+    }
+    int diff = i;
+    while (i < s.size()) {
+        s[i - diff] = s[i];
+        s[i++] = ' ';
+    }
+    while (!s.empty() && s.back() == ' ') {
+        s.pop_back();
+    }
+}
+
 std::pair<std::string, std::vector<std::string>> parseInput(const std::string& input) {
     std::string cmd;
     std::vector<std::string> args;
@@ -12,10 +27,10 @@ std::pair<std::string, std::vector<std::string>> parseInput(const std::string& i
         }
         cmd.push_back(input[i]);
     }
-    i++;
     std::string curArg;
     for (; i < input.size(); i++) {
         if (input[i] == ',') {
+            trim(curArg);
             args.push_back(curArg);
             curArg.clear();
         }
@@ -23,8 +38,10 @@ std::pair<std::string, std::vector<std::string>> parseInput(const std::string& i
             curArg.push_back(input[i]);
         }
     }
-    if (!curArg.empty())
+    if (!curArg.empty()) {
+        trim(curArg);
         args.push_back(curArg);
+    }
     return { cmd, args };
 }
 
@@ -69,6 +86,7 @@ int main() {
     };
     // Load in the user info 
     User user("user.txt");
+    // TODO: Load in courses info from database
 
     std::string input;
     while (getline(std::cin, input)) {
