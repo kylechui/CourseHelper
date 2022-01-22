@@ -8,7 +8,7 @@ WIP
 WIP
 
 ## TODO/Future Ideas
-- [ ] Add user information file that contains list of completed courses
+- [X] Add user information file that contains list of completed courses
 - [ ] Implement interactive command that allows the user to add/remove courses
   from both the "database" and their own list
 - [ ] Implement command that gives the user a list of all classes that can be
