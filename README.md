@@ -1,6 +1,10 @@
 # CourseHelper
 A CLI program to help you prepare for course registration.
 
+## Dependencies
+This project requires [Selenium](https://www.selenium.dev/) to scrape data from
+UCLA's course catalog and generate databases.
+
 ## Quick Start
 WIP
 
