@@ -3,12 +3,12 @@
 #include "User.hpp"
 
 void trim(std::string& s) {
-    int i = 0;
-    while (i < s.size() && s[i] == ' ') {
+    int i = 0, sz = s.size();
+    while (i < sz && s[i] == ' ') {
         i++;
     }
     int diff = i;
-    while (i < s.size()) {
+    while (i < sz) {
         s[i - diff] = s[i];
         s[i++] = ' ';
     }
