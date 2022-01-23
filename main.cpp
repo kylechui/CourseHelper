@@ -64,11 +64,10 @@ void printHelpMessage() {
 }
 
 Course* getCourse(const std::string& name, std::unordered_map<std::string, Course*>& courseMap) {
-    const std::string NO_DESCRIPTION = "No description provided.";
     if (courseMap.find(name) != courseMap.end()) {
         return courseMap[name];
     }
-    return new Course(name, NO_DESCRIPTION);
+    return new Course(name);
 }
 
 void printInfo(Course* const course) {
@@ -89,7 +88,7 @@ void printInfo(Course* const course) {
     if (choices.size() != 0) {
         // TODO: Come up with better var name (maybe)
         for (std::set<Course*>& st : choices) {
-            std::cout << "You may choose at least one of the following:" << std::endl;
+            std::cout << "You may choose at least one from the following:" << std::endl;
             for (Course* prereq : st) {
                 std::cout << "- " << prereq->getName() << std::endl;
             }
@@ -98,25 +97,28 @@ void printInfo(Course* const course) {
     std::cout << "========================================" << std::endl;
 }
 
-// TODO: Parse the prereq text file into the nodes
-void loadNodes(const std::string& dept, std::unordered_map<std::string, Course*>& courseMap) {
-    // Generate a santized path variable
-    std::string deptPath(dept);
-    for (char& c : deptPath) {
-        if (c == ' ')
-            c = '_';
+// TODO: Fix parsing when ( and ) are involved
+void loadFile(const std::string& prefix, std::unordered_map<std::string, Course*>& courseMap) {
+    // Get the department name
+    std::string dept(prefix.begin() + 10, prefix.end());
+    for (char& c : dept) {
+        if (c == '_') {
+            c = ' ';
+        }
     }
     // Read in all input files simultaneously for the given department
-    std::ifstream IDs("./Courses/" + deptPath + "_IDs.txt", std::ifstream::in);
-    std::ifstream descriptions("./Courses/" + deptPath + "_descriptions.txt", std::ifstream::in);
-    std::ifstream prereqs("./Courses/" + deptPath + "_prereqs.txt", std::ifstream::in);
+    std::ifstream IDs(prefix + "_IDs.txt", std::ifstream::in);
+    std::ifstream descriptions(prefix + "_descriptions.txt", std::ifstream::in);
+    std::ifstream prereqs(prefix + "_prereqs.txt", std::ifstream::in);
     std::string ID;
     while (getline(IDs, ID)) {
         std::string prereq, desc, name = dept + ' ' + ID;
         getline(prereqs, prereq);
         getline(descriptions, desc);
         Course* curCourse = getCourse(name, courseMap);
-        curCourse->setDescription(desc);
+        if (!desc.empty()) {
+            curCourse->setDescription(desc);
+        }
         // If there are no prereqs, go to the next Course
         if (prereq.empty()) {
             courseMap[name] = curCourse;
@@ -144,6 +146,9 @@ void loadNodes(const std::string& dept, std::unordered_map<std::string, Course*>
                         while (!curPrereqName.empty() && curPrereqName.back() == ' ') {
                             curPrereqName.pop_back();
                         }
+                        if (isdigit(curPrereqName[0])) {
+                            curPrereqName = dept + ' ' + curPrereqName;
+                        }
                         choices.insert(getCourse(curPrereqName, courseMap));
                         curPrereqName.clear();
                         j++;
@@ -159,6 +164,9 @@ void loadNodes(const std::string& dept, std::unordered_map<std::string, Course*>
                 curCourse->addChoice(choices);
             }
             else {
+                if (isdigit(prereqName[0])) {
+                    prereqName = dept + ' ' + prereqName;
+                }
                 curCourse->addPrereq(getCourse(prereqName, courseMap));
                 prereqName.clear();
             }
@@ -187,7 +195,7 @@ int main() {
         UPDATE,
     };
     // Input table that will validate inputs from the user, returns input codes
-    const std::map<std::string, int> validInputs = {
+    const std::unordered_map<std::string, int> validInputs = {
         { "available", AVAILABLE },
         { "exit", EXIT },
         { "help", HELP },
@@ -199,10 +207,14 @@ int main() {
     };
     // Load in the user info 
     User user("user.txt");
-    // TODO: Load in courses info from *all* database files
+    // Load in prerequisite info from local text files
     std::unordered_map<std::string, Course*> courseMap;
-    // TODO: Remove tests
-    loadNodes("Computer Science", courseMap);
+    for (auto& entry : std::filesystem::directory_iterator("./Courses")) {
+        std::string filename = std::string(entry.path());
+        if (filename.substr(filename.size() - 8) == "_IDs.txt") {
+            loadFile(filename.substr(0, filename.size() - 8), courseMap);
+        }
+    }
 
     std::string input;
     while (getline(std::cin, input)) {

@@ -5,7 +5,7 @@
 
 class Course {
 public:
-    Course(const std::string& name, const std::string& description);
+    Course(const std::string& name);
     ~Course();
     std::string getName();
     std::string getDescription();

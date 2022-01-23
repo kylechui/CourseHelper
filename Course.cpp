@@ -1,8 +1,9 @@
 #include <bits/stdc++.h>
 #include "Course.hpp"
 
-Course::Course(const std::string& name, const std::string& description) :
-    m_name(name), m_description(description) {
+Course::Course(const std::string& name) :
+    m_name(name) {
+        m_description = "No description provided.";
 }
 
 Course::~Course() {

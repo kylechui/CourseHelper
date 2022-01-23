@@ -1,0 +1,124 @@
+Math Diagnostic Test
+1 | Math Diagnostic Test with a score of 48 or better
+3A
+3B
+31A, 31B
+
+1 | Math Diagnostic Test
+1 | Math Diagnostic Test
+31A
+31A
+31A
+31A
+31A
+31B, 32A
+31B, 32A
+30A, 30B
+3B | 31B | 32A
+3B | 31B | 32A
+31B
+31A, 31B, 32A, 32B, 33A, Statistics 10 | Statistics 12 | Statistics 13, Computer Science 31 | Program in Computing 10A | Statistics 20
+31A, 31B
+31A, 31B
+
+
+
+
+
+32A, 32B
+
+
+
+
+31A
+100 | Past competition results
+115A
+103A
+103B
+110A | 117, 120A | 123, 131A
+105A, 110A | 117, 120A | 123, 131A
+105A, 105B, 110A | 117, 120A | 123, 131A
+31A, 31B, 32A
+115A
+115A
+110A | 117
+110A | 117
+110A, 110B
+110A
+110A | 131A | Philosophy 135
+110A | 131A | Philosophy 135
+110A | 131A | Philosophy 135
+33A
+33A
+115A
+115A
+115A
+42, 115A
+32B, 33B, 115A, 131A
+32B, 33B, 115A, 120A, 131A
+131A
+115A
+32B, 33B
+32B, 33B
+33B, 115A, 131A
+33B, 115A, 131A
+131A, 131B
+32B, 33B
+32B, 33B, 131A
+32B, 33B, 131A
+33B
+33A, 33B
+33A, 33B
+32B, 33B
+32B, 33B
+(118, 131A, 156) | (Statistics 101C, Statistics 170S) | (Statistics 100B, Statistics 101A)
+32B, 33B, 115A, Programming in Computing 10A | Computer Science 31
+32B, 33B, 115A, 131A, Computer Science 31
+151A
+115A | 115AH, 131A | 131AH, 151A | 151AH, Programming in Computing 10A | Computer Science 31
+32B, 33B, 115A, Programming in Computing 10A | Computer Science 31
+115A, 164, 170A | 170E | Statistics 100A, Programming in Computing 10A | Computer Science 31
+115A, 131A
+115A
+115A, 170E | 170A | Electrical and Computer Engineering 131A | Statistics 100A
+32B, 33A, 131A
+131A, 170A
+31A, 31B
+31A, 31B, 170A | 170E | Statistics 100A
+33A, 170A | 170E | Statistics 100A
+33A, 170A | 170E | Statistics 100A
+32B
+32B, 170A | 170E | Statistics 100A, 175 | 177
+170B | 170S | Statistics 100B, 178A
+178B
+174E
+31A, 31B, 61
+3C | 32A, 61
+31A, 31B, 61, 115A
+
+188SA
+188SB
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -8,6 +8,8 @@ scraping code (found in `scraper.py`) to work for other websites!
 ## Quick Start
 Just C++17 is strictly necessary for using this project :)
 
+**TODO:** Add more shell commands here for actually cloning etc.
+
 ### Dependencies
 * [Selenium](https://www.selenium.dev/): Provides library to retrieve
   information from websites
@@ -37,6 +39,10 @@ info Computer Science 180
 duplicated local databases
 
 ## Limitations
+Don't take this project as gospel---always make sure with UCLA's websites and
+your counselor that certain courses count for credit. On that note, if you are
+experiencing any errors, feel free to open an issue or PR.
+
 As of right now, the pre-requisite relationships between courses has to be
 parsed manually and inputted into a local text file. I would have liked to
 web scrape for the course relationships, but I'm not good enough at RegExp to
@@ -62,5 +68,6 @@ a simpler manner, feel free to open an issue!
 - [ ] Visualizer for the course graph
 - [X] Web scraping to automatically generate the input data
 - [ ] Maybe write a shell script to set up the project on install?
+  - [ ] Alternatively, turn this into a web app
 - [ ] Add checks for whether the user has Chrome/ChromeDriver/Selenium
   installed, and show if not, show warnings when they run `update`
