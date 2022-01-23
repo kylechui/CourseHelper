@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <bits/stdc++.h>
 #include "Course.hpp"
 #include "User.hpp"
@@ -62,6 +63,121 @@ void printHelpMessage() {
     }
 }
 
+void printInfo(Course* const course) {
+    std::vector<Course*> prereqs = course->getPrereqs();
+    std::vector<std::set<Course*>> choices = course->getChoices();
+    std::cout << course->getName() << std::endl;
+    // TODO: Add course description text
+    // std::cout << "Description goes here (maybe)" << std::endl;
+    // Print prereq information
+    if (prereqs.size() == 0 && choices.size() == 0) {
+        std::cout << "There are no requirements for this class." << std::endl;
+    }
+    if (prereqs.size() != 0) {
+        std::cout << "You must take the following courses:" << std::endl;
+        for (Course* prereq : prereqs) {
+            std::cout << "* " << prereq->getName() << std::endl;
+        }
+    }
+    if (choices.size() != 0) {
+        // TODO: Come up with better var name (maybe)
+        for (std::set<Course*>& st : choices) {
+            std::cout << "You may choose at least one of the following:" << std::endl;
+            for (Course* prereq : st) {
+                std::cout << "- " << prereq->getName() << std::endl;
+            }
+        }
+    }
+    std::cout << "========================================" << std::endl;
+}
+
+// TODO: Parse the prereq text file into the nodes
+void loadNodes(const std::string& dept, std::unordered_map<std::string, Course*>& courseMap) {
+    const std::string NO_DESCRIPTION = "No description provided";
+    // Generate a santized path variable
+    std::string deptPath(dept);
+    for (char& c : deptPath) {
+        if (c == ' ')
+            c = '_';
+    }
+    // Read in all input files simultaneously for the given department
+    std::ifstream IDs("./Courses/" + deptPath + "_IDs.txt", std::ifstream::in);
+    std::ifstream descriptions("./Courses/" + deptPath + "_descriptions.txt", std::ifstream::in);
+    std::ifstream prereqs("./Courses/" + deptPath + "_prereqs.txt", std::ifstream::in);
+    std::string ID;
+    while (getline(IDs, ID)) {
+        std::string prereq, desc, name = dept + ' ' + ID;
+        getline(prereqs, prereq);
+        getline(descriptions, desc);
+        Course* curCourse = new Course(name, desc);
+        if (prereq.empty()) {
+            courseMap[name] = curCourse;
+            continue;
+        }
+        // Parse prereq and add the corresponding prereqs to the current Course
+        prereq.push_back(',');
+        int i = 0;
+        std::string prereqName;
+        while (i < prereq.size()) {
+            bool isChoice = false;
+            while (prereq[i] != ',') {
+                if (prereq[i] == '|')
+                    isChoice = true;
+                prereqName.push_back(prereq[i++]);
+            }
+            if (isChoice) {
+                prereqName += " |";
+                std::set<Course*> choices;
+                std::string curPrereqName;
+                int j = 0;
+                while (j < prereqName.size()) {
+                    if (prereqName[j] == '|') {
+                        // Trim trailing whitespace
+                        while (!curPrereqName.empty() && curPrereqName.back() == ' ') {
+                            curPrereqName.pop_back();
+                        }
+                        // Add corresponding Course to choices
+                        if (courseMap.find(curPrereqName) != courseMap.end()) {
+                            choices.insert(courseMap[curPrereqName]);
+                        }
+                        else {
+                            choices.insert(new Course(curPrereqName, NO_DESCRIPTION));
+                        }
+                        curPrereqName.clear();
+                        j++;
+                        // Trim leading whitespace
+                        while (j < prereqName.size() && prereqName[j] == ' ') {
+                            j++;
+                        }
+                    }
+                    else {
+                        curPrereqName.push_back(prereqName[j++]);
+                    }
+                }
+                curCourse->addPrereqs(choices);
+            }
+            else {
+                // Add corresponding Course to list of prereqs
+                if (courseMap.find(prereqName) != courseMap.end()) {
+                    curCourse->addPrereq(courseMap[prereqName]);
+                }
+                else {
+                    curCourse->addPrereq(new Course(prereqName, NO_DESCRIPTION));
+                }
+                prereqName.clear();
+            }
+            i++;
+            while (i < prereq.size() && prereq[i] == ' ') {
+                i++;
+            }
+        }
+        courseMap[name] = curCourse;
+    }
+    IDs.close();
+    prereqs.close();
+    descriptions.close();
+}
+
 int main() {
     // Define input codes to denote various actions
     enum inputCode {
@@ -88,7 +204,12 @@ int main() {
     // Load in the user info 
     User user("user.txt");
     // TODO: Load in courses info from *all* database files
-    // Format database files [DEPT]_[IDs|descriptions].txt
+    std::unordered_map<std::string, Course*> courseMap;
+    // TODO: Remove tests
+    loadNodes("Computer Science", courseMap);
+    for (auto& it : courseMap) {
+        printInfo(it.second);
+    }
 
     std::string input;
     while (getline(std::cin, input)) {

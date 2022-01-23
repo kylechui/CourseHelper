@@ -11,9 +11,8 @@ Just C++17 is strictly necessary for using this project :)
 ### Optional Dependencies
 * [Selenium](https://www.selenium.dev/): Provides library to retrieve
   information from websites
-* [ChromeDriver](https://chromedriver.chromium.org/downloads): Simulates
-  browser interactions with [Chrome](https://www.google.com/chrome/index.html)
-  to allow for scraping dynamically loaded sites
+* [WebDriver Manager](https://pypi.org/project/webdriver-manager/): Helps you
+  manage browser drivers for simulated interactions
 
 **TODO:** Add mention for how to set up and use ChromeDriver (path)
 
@@ -36,6 +35,13 @@ update Computer Science
 **TODO:** Implement/explain how to set up aliases to decrease likelihood of
 duplicated local databases
 
+## Limitations
+As of right now, the pre-requisite relationships between courses has to be
+parsed manually and inputted into a local text file, as I'm not good enough at
+regexp to parse the description files into a short list (particularly handling
+words like "and"). If you've found an alternate website that lists these
+relationships, feel free to open an issue!
+
 ## TODO/Future Ideas
 - [X] Add user information file that contains list of completed courses
 - [X] Implement interactive command that allows the user to add/remove courses
@@ -54,3 +60,5 @@ duplicated local databases
 - [ ] Visualizer for the course graph
 - [X] Web scraping to automatically generate the input data
 - [ ] Maybe write a shell script to set up the project on install?
+- [ ] Add checks for whether the user has Chrome/ChromeDriver/Selenium
+  installed, and show if not, show warnings when they run `update`
