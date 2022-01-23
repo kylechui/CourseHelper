@@ -63,12 +63,19 @@ void printHelpMessage() {
     }
 }
 
+Course* getCourse(const std::string& name, std::unordered_map<std::string, Course*>& courseMap) {
+    const std::string NO_DESCRIPTION = "No description provided.";
+    if (courseMap.find(name) != courseMap.end()) {
+        return courseMap[name];
+    }
+    return new Course(name, NO_DESCRIPTION);
+}
+
 void printInfo(Course* const course) {
     std::vector<Course*> prereqs = course->getPrereqs();
     std::vector<std::set<Course*>> choices = course->getChoices();
-    std::cout << course->getName() << std::endl;
-    // TODO: Add course description text
-    // std::cout << "Description goes here (maybe)" << std::endl;
+    std::cout << course->getName() << std::endl << std::endl;
+    std::cout << course->getDescription() << std::endl << std::endl;
     // Print prereq information
     if (prereqs.size() == 0 && choices.size() == 0) {
         std::cout << "There are no requirements for this class." << std::endl;
@@ -93,7 +100,6 @@ void printInfo(Course* const course) {
 
 // TODO: Parse the prereq text file into the nodes
 void loadNodes(const std::string& dept, std::unordered_map<std::string, Course*>& courseMap) {
-    const std::string NO_DESCRIPTION = "No description provided";
     // Generate a santized path variable
     std::string deptPath(dept);
     for (char& c : deptPath) {
@@ -109,7 +115,9 @@ void loadNodes(const std::string& dept, std::unordered_map<std::string, Course*>
         std::string prereq, desc, name = dept + ' ' + ID;
         getline(prereqs, prereq);
         getline(descriptions, desc);
-        Course* curCourse = new Course(name, desc);
+        Course* curCourse = getCourse(name, courseMap);
+        curCourse->setDescription(desc);
+        // If there are no prereqs, go to the next Course
         if (prereq.empty()) {
             courseMap[name] = curCourse;
             continue;
@@ -136,13 +144,7 @@ void loadNodes(const std::string& dept, std::unordered_map<std::string, Course*>
                         while (!curPrereqName.empty() && curPrereqName.back() == ' ') {
                             curPrereqName.pop_back();
                         }
-                        // Add corresponding Course to choices
-                        if (courseMap.find(curPrereqName) != courseMap.end()) {
-                            choices.insert(courseMap[curPrereqName]);
-                        }
-                        else {
-                            choices.insert(new Course(curPrereqName, NO_DESCRIPTION));
-                        }
+                        choices.insert(getCourse(curPrereqName, courseMap));
                         curPrereqName.clear();
                         j++;
                         // Trim leading whitespace
@@ -154,16 +156,10 @@ void loadNodes(const std::string& dept, std::unordered_map<std::string, Course*>
                         curPrereqName.push_back(prereqName[j++]);
                     }
                 }
-                curCourse->addPrereqs(choices);
+                curCourse->addChoice(choices);
             }
             else {
-                // Add corresponding Course to list of prereqs
-                if (courseMap.find(prereqName) != courseMap.end()) {
-                    curCourse->addPrereq(courseMap[prereqName]);
-                }
-                else {
-                    curCourse->addPrereq(new Course(prereqName, NO_DESCRIPTION));
-                }
+                curCourse->addPrereq(getCourse(prereqName, courseMap));
                 prereqName.clear();
             }
             i++;
@@ -191,7 +187,7 @@ int main() {
         UPDATE,
     };
     // Input table that will validate inputs from the user, returns input codes
-    const std::unordered_map<std::string, int> validInputs = {
+    const std::map<std::string, int> validInputs = {
         { "available", AVAILABLE },
         { "exit", EXIT },
         { "help", HELP },
@@ -207,9 +203,6 @@ int main() {
     std::unordered_map<std::string, Course*> courseMap;
     // TODO: Remove tests
     loadNodes("Computer Science", courseMap);
-    for (auto& it : courseMap) {
-        printInfo(it.second);
-    }
 
     std::string input;
     while (getline(std::cin, input)) {
@@ -231,8 +224,12 @@ int main() {
                 printHelpMessage();
                 break;
             case INFO:
-                // TODO: Add code that returns basic information about a given class,
-                // including missing pre-reqs (if any)
+                if (courseMap.find(args[0]) != courseMap.end()) {
+                    printInfo(courseMap[args[0]]);
+                }
+                else {
+                    std::cout << "Course not found. Please try again." << std::endl;
+                }
                 break;
             case LIST:
                 user.printTakenCourses();

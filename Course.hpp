@@ -9,13 +9,14 @@ public:
     ~Course();
     std::string getName();
     std::string getDescription();
+    void setDescription(const std::string& description);
     std::vector<Course*> getPrereqs();
     std::vector<std::set<Course*>> getChoices();
-    void addPrereq(Course* other);
-    void addPrereqs(std::set<Course*>& other);
+    void addPrereq(Course* prereq);
+    void addChoice(std::set<Course*>& choice);
 private:
     const std::string m_name;
-    const std::string m_description;
+    std::string m_description;
     std::vector<Course*> m_prereqs;
     std::vector<std::set<Course*>> m_choices;
 };

@@ -19,6 +19,10 @@ std::string Course::getDescription() {
     return m_description;
 }
 
+void Course::setDescription(const std::string& description) {
+    m_description = description;
+}
+
 std::vector<Course*> Course::getPrereqs() {
     return m_prereqs;
 
@@ -28,10 +32,10 @@ std::vector<std::set<Course*>> Course::getChoices() {
     return m_choices;
 }
 
-void Course::addPrereq(Course* other) {
-    m_prereqs.push_back(other);
+void Course::addPrereq(Course* prereq) {
+    m_prereqs.push_back(prereq);
 }
 
-void Course::addPrereqs(std::set<Course*>& other) {
-    m_choices.push_back(other);
+void Course::addChoice(std::set<Course*>& choice) {
+    m_choices.push_back(choice);
 }
