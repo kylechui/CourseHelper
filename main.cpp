@@ -1,59 +1,7 @@
 #include <bits/stdc++.h>
+#include "utils.hpp"
 #include "Course.hpp"
 #include "User.hpp"
-
-// TODO: Move these into utils
-std::string trim(const std::string& s) {
-    int l = 0, r = s.size() - 1;
-    while (l <= r && s[l] == ' ') {
-        l++;
-    }
-    while (l <= r && s[r] == ' ') {
-        r--;
-    }
-    return s.substr(l, r - l + 1);
-}
-
-// TODO: Move these into utils
-bool isPrefix(const std::string& s, const std::string& prefix) {
-    if (prefix.size() > s.size()) {
-        return false;
-    }
-    for (size_t i = 0; i < prefix.size(); i++) {
-        if (prefix[i] != s[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
-std::pair<std::string, std::vector<std::string>> parseInput(const std::string& input) {
-    std::string cmd;
-    std::vector<std::string> args;
-    size_t i;
-    // Read up until the first whitespace character as the command
-    for (i = 0; i < input.size(); i++) {
-        if (input[i] == ' ') {
-            break;
-        }
-        cmd.push_back(input[i]);
-    }
-    // The remaining characters are comma-separated arguments
-    std::string curArg;
-    for (; i < input.size(); i++) {
-        if (input[i] == ',') {
-            args.push_back(trim(curArg));
-            curArg.clear();
-        }
-        else {
-            curArg.push_back(input[i]);
-        }
-    }
-    if (!curArg.empty()) {
-        args.push_back(trim(curArg));
-    }
-    return { cmd, args };
-}
 
 void printHelpMessage() {
     const std::vector<std::pair<std::string, std::string>> helpMessage = {

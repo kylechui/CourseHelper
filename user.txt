@@ -1,6 +1,5 @@
 Computer Science 32
 Computer Science 31
-Mathematics 61
 Mathematics 151A
 Mathematics 115A
 Mathematics 131A
@@ -15,3 +14,4 @@ Mathematics 32A
 Mathematics 32B
 Mathematics 33A
 Mathematics 33B
+Mathematics 61
