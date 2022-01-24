@@ -2,6 +2,7 @@
 #define COURSE_H_
 
 #include <bits/stdc++.h>
+class User;
 
 class Course {
 public:
@@ -9,11 +10,13 @@ public:
     ~Course();
     std::string getName();
     std::string getDescription();
-    void setDescription(const std::string& description);
     std::vector<Course*> getPrereqs();
     std::vector<std::set<Course*>> getChoices();
+    std::vector<Course*> getAllPrereqs();
+    void setDescription(const std::string& description);
     void addPrereq(Course* prereq);
     void addChoice(std::set<Course*>& choice);
+    void printInfo(User& user);
 private:
     const std::string m_name;
     std::string m_description;

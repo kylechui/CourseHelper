@@ -28,60 +28,7 @@ Course* getCourse(const std::string& name, std::unordered_map<std::string, Cours
     return new Course(name);
 }
 
-// TODO: Make this a member function of the Course class (pass user as param)
-void printInfo(Course* const& course, User& user) {
-    std::vector<Course*> prereqs = course->getPrereqs();
-    std::vector<std::set<Course*>> choices = course->getChoices();
-    std::cout << course->getName() << std::endl << std::endl;
-    std::cout << course->getDescription() << std::endl << std::endl;
-    // Print prereq information
-    if (user.hasTaken(course)) {
-        std::cout << "You have already taken this class." << std::endl;
-    }
-    else if (user.hasAllPrereqs(course)) {
-        std::cout << "You can take this class next quarter!" << std::endl;
-    }
-    else {
-        if (prereqs.size() == 0 && choices.size() == 0) {
-            std::cout << "There are no requirements for this class." << std::endl;
-        }
-        if (prereqs.size() != 0) {
-            std::cout << "You still need to take the following courses:" << std::endl;
-            for (Course* prereq : prereqs) {
-                if (!user.hasTaken(prereq)) {
-                    std::cout << "* " << prereq->getName() << std::endl;
-                }
-            }
-        }
-        if (choices.size() != 0) {
-            for (std::set<Course*>& choice : choices) {
-                std::cout << "You may choose at least one from the following:" << std::endl;
-                for (Course* prereq : choice) {
-                    std::cout << "- " << prereq->getName() << std::endl;
-                }
-            }
-        }
-    }
-    std::cout << "========================================" << std::endl;
-}
 
-// TODO: Make this a member function of the Course class (no params)
-std::vector<Course*> getAllPrereqs(Course*& course) {
-    std::unordered_set<Course*> processed;
-    auto dfs = [&processed](Course*& cur, auto&& dfs) -> void {
-        processed.insert(cur);
-        for (Course*& prereq : cur->getPrereqs()) {
-            if (processed.find(prereq) == processed.end()) {
-                dfs(prereq, dfs);
-            }
-        }
-    };
-    dfs(course, dfs);
-    processed.erase(course);
-    std::vector<Course*> sorted(processed.begin(), processed.end());
-    sort(begin(sorted), end(sorted));
-    return sorted;
-}
 
 // TODO: Fix parsing when ( and ) are involved
 void loadFile(const std::string& prefix, std::unordered_map<std::string, Course*>& courseMap) {
@@ -210,11 +157,10 @@ int main() {
         }
     }
     // Load in the user info 
-    User user("user.txt");
+    User user(courseMap, "user.txt");
 
     std::string input;
     while (getline(std::cin, input)) {
-        // Parse the input command
         auto [cmd, args] = parseInput(input);
         // Check if the input command is valid or not
         if (validInputs.find(cmd) == validInputs.end()) {
@@ -252,7 +198,7 @@ int main() {
                 break;
             case INFO:
                 if (!args.empty() && courseMap.find(args[0]) != courseMap.end()) {
-                    printInfo(courseMap[args[0]], user);
+                    courseMap[args[0]]->printInfo(user);
                 }
                 else {
                     std::cout << "Course not found. Please try again." << std::endl;
@@ -264,7 +210,7 @@ int main() {
             case PREREQ:
                 if (!args.empty() && courseMap.find(args[0]) != courseMap.end()) {
                     std::cout << "You need the following:" << std::endl;
-                    for (Course*& course : getAllPrereqs(courseMap[args[0]])) {
+                    for (Course*& course : courseMap[args[0]]->getAllPrereqs()) {
                         std::cout << "* " << course->getName() << std::endl;
                     }
                 }
@@ -273,14 +219,10 @@ int main() {
                 }
                 break;
             case TAKE:
-                for (const std::string& course : args) {
-                    user.addCourse(course);
-                }
+                user.addCourses(courseMap, args);
                 break;
             case REMOVE:
-                for (const std::string& course : args) {
-                    user.removeCourse(course);
-                }
+                user.removeCourses(courseMap, args);
                 break;
             case UPDATE:
                 std::ignore = std::system(("python3 ./scraper.py " + args[0]).c_str());
