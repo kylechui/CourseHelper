@@ -1,23 +1,20 @@
-#include <algorithm>
 #include <bits/stdc++.h>
 #include "Course.hpp"
 #include "User.hpp"
 
-void trim(std::string& s) {
-    int i = 0, sz = s.size();
-    while (i < sz && s[i] == ' ') {
-        i++;
+// TODO: Move these into utils
+std::string trim(const std::string& s) {
+    int l = 0, r = s.size() - 1;
+    while (l <= r && s[l] == ' ') {
+        l++;
     }
-    int diff = i;
-    while (i < sz) {
-        s[i - diff] = s[i];
-        s[i++] = ' ';
+    while (l <= r && s[r] == ' ') {
+        r--;
     }
-    while (!s.empty() && s.back() == ' ') {
-        s.pop_back();
-    }
+    return s.substr(l, r - l + 1);
 }
 
+// TODO: Move these into utils
 bool isPrefix(const std::string& s, const std::string& prefix) {
     if (prefix.size() > s.size()) {
         return false;
@@ -34,17 +31,18 @@ std::pair<std::string, std::vector<std::string>> parseInput(const std::string& i
     std::string cmd;
     std::vector<std::string> args;
     size_t i;
+    // Read up until the first whitespace character as the command
     for (i = 0; i < input.size(); i++) {
         if (input[i] == ' ') {
             break;
         }
         cmd.push_back(input[i]);
     }
+    // The remaining characters are comma-separated arguments
     std::string curArg;
     for (; i < input.size(); i++) {
         if (input[i] == ',') {
-            trim(curArg);
-            args.push_back(curArg);
+            args.push_back(trim(curArg));
             curArg.clear();
         }
         else {
@@ -52,8 +50,7 @@ std::pair<std::string, std::vector<std::string>> parseInput(const std::string& i
         }
     }
     if (!curArg.empty()) {
-        trim(curArg);
-        args.push_back(curArg);
+        args.push_back(trim(curArg));
     }
     return { cmd, args };
 }
@@ -83,6 +80,7 @@ Course* getCourse(const std::string& name, std::unordered_map<std::string, Cours
     return new Course(name);
 }
 
+// TODO: Make this a member function of the Course class (pass user as param)
 void printInfo(Course* const& course, User& user) {
     std::vector<Course*> prereqs = course->getPrereqs();
     std::vector<std::set<Course*>> choices = course->getChoices();
@@ -119,6 +117,7 @@ void printInfo(Course* const& course, User& user) {
     std::cout << "========================================" << std::endl;
 }
 
+// TODO: Make this a member function of the Course class (no params)
 std::vector<Course*> getAllPrereqs(Course*& course) {
     std::unordered_set<Course*> processed;
     auto dfs = [&processed](Course*& cur, auto&& dfs) -> void {
