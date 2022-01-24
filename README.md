@@ -25,6 +25,7 @@ Just C++17 is strictly necessary for using this project :)
 - [X] `list`: Shows list of courses that have already been taken
 - [X] `take [course]`: Adds course to the list of taken courses
 - [X] `info [ID]`: Shows information about a given course ID
+- [X] `prereq [ID]`: Lists all prereqs needed to take a given course ID
 - [X] `update [department]`: Updates course information for a given department
 
 ## Examples

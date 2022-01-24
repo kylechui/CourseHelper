@@ -56,6 +56,7 @@ void printHelpMessage() {
         { "add [course]", "Adds course to the courses database" },
         { "take [course]", "Adds course to the list of taken courses" },
         { "info [ID]", "Shows information about a given course ID" },
+        { "prereq [ID]", "Lists all prereqs needed to take a given course ID" },
         { "update [department]", "Updates course information for a given department" },
     };
     for (auto& [cmd, desc] : helpMessage) {
@@ -95,6 +96,21 @@ void printInfo(Course* const course) {
         }
     }
     std::cout << "========================================" << std::endl;
+}
+
+// TODO: Write DFS function to get *all* prereqs
+std::unordered_set<Course*> getAllPrereqs(Course*& course) {
+    std::unordered_set<Course*> processed;
+    auto dfs = [&processed](Course*& cur, auto&& dfs) -> void {
+        processed.insert(cur);
+        for (Course*& prereq : cur->getPrereqs()) {
+            if (processed.find(prereq) == processed.end()) {
+                dfs(prereq, dfs);
+            }
+        }
+    };
+    dfs(course, dfs);
+    return processed;
 }
 
 // TODO: Fix parsing when ( and ) are involved
@@ -190,6 +206,7 @@ int main() {
         HELP,
         INFO,
         LIST,
+        PREREQ,
         REMOVE,
         TAKE,
         UPDATE,
@@ -201,6 +218,7 @@ int main() {
         { "help", HELP },
         { "info", INFO },
         { "list", LIST },
+        { "prereq", PREREQ },
         { "remove", REMOVE },
         { "take", TAKE },
         { "update", UPDATE },
@@ -229,14 +247,13 @@ int main() {
         switch (validInputs.at(cmd)) {
             case AVAILABLE:
                 // TODO: Add code to list all available classes based on DAG
-                break;
             case EXIT:
                 return 0;
             case HELP:
                 printHelpMessage();
                 break;
             case INFO:
-                if (courseMap.find(args[0]) != courseMap.end()) {
+                if (!args.empty() && courseMap.find(args[0]) != courseMap.end()) {
                     printInfo(courseMap[args[0]]);
                 }
                 else {
@@ -245,6 +262,17 @@ int main() {
                 break;
             case LIST:
                 user.printTakenCourses();
+                break;
+            case PREREQ:
+                if (!args.empty() && courseMap.find(args[0]) != courseMap.end()) {
+                    std::cout << "You need the following:" << std::endl;
+                    for (Course* course : getAllPrereqs(courseMap[args[0]])) {
+                        std::cout << "* " << course->getName() << std::endl;
+                    }
+                }
+                else {
+                    std::cout << "Course not found. Please try again." << std::endl;
+                }
                 break;
             case TAKE:
                 for (const std::string& course : args) {
