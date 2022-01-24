@@ -42,7 +42,23 @@ std::vector<std::string> split(const std::string& src, const char& delimiter) {
 }
 
 /**
- * Returns whether a given string is a prefix of another string.
+ * Returns a string of components joined together by a delimiting string.
+ * @param components a list of split components to be joined together.
+ * @param delimiter the delimiter to be inserted between components.
+ * @return the components joined by delimiter.
+ */
+std::string join(const std::vector<std::string>& components, const std::string& delimiter) {
+    std::string result;
+    for (size_t i = 0; i < components.size() - 1; i++) {
+        result += components[i];
+        result += delimiter;
+    }
+    result += components.back();
+    return result;
+}
+
+/**
+ * Returns whether the given string is a prefix of another string.
  * @param src the source string.
  * @param prefix the potential prefix of src.
  * @return whether prefix is a prefix of src.
@@ -57,6 +73,20 @@ bool isPrefix(const std::string& src, const std::string& prefix) {
         }
     }
     return true;
+}
+
+/**
+ * Returns whether the given string is a valid course ID.
+ * @param src the source string.
+ * @return whether the first whitespace-delimited "word" of src has a digit.
+ */
+bool isID(const std::string& src) {
+    for (size_t i = 0; i < src.size() && src[i] != ' '; i++) {
+        if (isdigit(src[i])) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**

@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <vector>
 #include "utils.hpp"
 #include "Course.hpp"
 #include "User.hpp"
@@ -21,94 +22,110 @@ void printHelpMessage() {
     }
 }
 
-Course* getCourse(const std::string& name, std::unordered_map<std::string, Course*>& courseMap) {
-    if (courseMap.find(name) != courseMap.end()) {
-        return courseMap[name];
+/**
+ * Returns a pointer to the Course object corresponding to a given name, creates
+ * one otherwise.
+ * @param courseMap a map from names to Course pointers.
+ * @param name the name of the Course.
+ * @return a pointer to a Course object with name name.
+ */
+Course* getCourse(std::unordered_map<std::string, Course*>& courseMap, const std::string& name) {
+    if (courseMap.find(name) == courseMap.end()) {
+        courseMap[name] = new Course(name);
     }
-    return new Course(name);
+    return courseMap[name];
 }
 
-
-
-// TODO: Fix parsing when ( and ) are involved
-void loadFile(const std::string& prefix, std::unordered_map<std::string, Course*>& courseMap) {
+void loadFile(const std::string& pathPrefix, std::unordered_map<std::string, Course*>& courseMap) {
+    const std::string prefix = "./Courses/";
     // Get the department name
-    std::string dept(prefix.begin() + 10, prefix.end());
-    for (char& c : dept) {
-        if (c == '_') {
-            c = ' ';
-        }
-    }
+    std::string dept(pathPrefix.begin() + prefix.size(), pathPrefix.end());
+    replace(dept.begin(), dept.end(), '_', ' ');
     // Read in all input files simultaneously for the given department
-    std::ifstream IDs(prefix + "_IDs.txt", std::ifstream::in);
-    std::ifstream descriptions(prefix + "_descriptions.txt", std::ifstream::in);
-    std::ifstream prereqs(prefix + "_prereqs.txt", std::ifstream::in);
-    std::string ID;
-    while (getline(IDs, ID)) {
-        std::string prereq, desc, name = dept + ' ' + ID;
-        getline(prereqs, prereq);
-        getline(descriptions, desc);
-        Course* curCourse = getCourse(name, courseMap);
-        if (!desc.empty()) {
-            curCourse->setDescription(desc);
-        }
+    std::ifstream IDs(pathPrefix + "_IDs.txt", std::ifstream::in);
+    std::ifstream descriptions(pathPrefix + "_descriptions.txt", std::ifstream::in);
+    std::ifstream prereqs(pathPrefix + "_prereqs.txt", std::ifstream::in);
+    std::string ID, prereq, desc;
+    while (getline(IDs, ID) && getline(prereqs, prereq) && getline(descriptions, desc)) {
+        std::string name = dept + ' ' + ID;
+        Course* curCourse = getCourse(courseMap, name);
+        curCourse->setDescription(desc);
         // If there are no prereqs, go to the next Course
         if (prereq.empty()) {
-            courseMap[name] = curCourse;
             continue;
         }
         // Parse prereq and add the corresponding prereqs to the current Course
-        prereq.push_back(',');
-        size_t i = 0;
-        std::string prereqName;
-        while (i < prereq.size()) {
-            bool isChoice = false;
-            while (prereq[i] != ',') {
-                if (prereq[i] == '|')
+        // First split by comma (but only if not inside parens)
+        std::vector<std::string> components;
+        std::string component;
+        int depth = 0;
+        for (const char& c : prereq) {
+            if (c == ',' && depth == 0) {
+                components.emplace_back(component);
+                component.clear();
+            }
+            else if (c == '(') {
+                depth++;
+            }
+            else if (c == ')') {
+                depth--;
+            }
+            else {
+                component.push_back(c);
+            }
+        }
+        if (!component.empty()) {
+            components.emplace_back(component);
+        }
+        // Find whether each component is:
+        // * A standalone course name
+        // * A choice (choose one course from the list)
+        // * A pathway (choose one sublist from a list of lists)
+        // Then add it to the current Course using the corresponding method
+        for (std::string& component : components) {
+            bool isChoice = false, isPathway = false;
+            for (const char& c : component) {
+                if (c == '|') {
                     isChoice = true;
-                prereqName.push_back(prereq[i++]);
+                    break;
+                }
+                if (c == ',') {
+                    isPathway = true;
+                    break;
+                }
             }
             if (isChoice) {
-                prereqName += " |";
+                std::vector<std::string> choiceNames = split(component, '|');
                 std::set<Course*> choices;
-                std::string curPrereqName;
-                size_t j = 0;
-                while (j < prereqName.size()) {
-                    if (prereqName[j] == '|') {
-                        // Trim trailing whitespace
-                        while (!curPrereqName.empty() && curPrereqName.back() == ' ') {
-                            curPrereqName.pop_back();
-                        }
-                        if (isdigit(curPrereqName[0])) {
-                            curPrereqName = dept + ' ' + curPrereqName;
-                        }
-                        choices.insert(getCourse(curPrereqName, courseMap));
-                        curPrereqName.clear();
-                        j++;
-                        // Trim leading whitespace
-                        while (j < prereqName.size() && prereqName[j] == ' ') {
-                            j++;
-                        }
+                for (std::string& choiceName : choiceNames) {
+                    choiceName = trimWhitespace(choiceName);
+                    if (isID(choiceName)) {
+                        choiceName = dept + ' ' + choiceName;
                     }
-                    else {
-                        curPrereqName.push_back(prereqName[j++]);
-                    }
+                    choices.insert(getCourse(courseMap, choiceName));
                 }
                 curCourse->addChoice(choices);
             }
-            else {
-                if (isdigit(prereqName[0])) {
-                    prereqName = dept + ' ' + prereqName;
+            else if (isPathway) {
+                std::vector<std::string> pathwayNames = split(component, ',');
+                std::set<Course*> pathways;
+                for (std::string& pathwayName : pathwayNames) {
+                    pathwayName = trimWhitespace(pathwayName);
+                    if (isID(pathwayName)) {
+                        pathwayName = dept + ' ' + pathwayName;
+                    }
+                    pathways.insert(getCourse(courseMap, trimWhitespace(pathwayName)));
                 }
-                curCourse->addPrereq(getCourse(prereqName, courseMap));
-                prereqName.clear();
+                curCourse->addPathway(pathways);
             }
-            i++;
-            while (i < prereq.size() && prereq[i] == ' ') {
-                i++;
+            else {
+                component = trimWhitespace(component);
+                if (isID(component)) {
+                    component = dept + ' ' + component;
+                }
+                curCourse->addPrereq(getCourse(courseMap, component));
             }
         }
-        courseMap[name] = curCourse;
     }
     IDs.close();
     prereqs.close();
@@ -145,20 +162,17 @@ int main() {
     std::unordered_set<std::string> departments;
     for (auto& entry : std::filesystem::directory_iterator("./Courses")) {
         std::string filename = std::string(entry.path());
-        if (filename.substr(filename.size() - 8) == "_IDs.txt") {
-            loadFile(filename.substr(0, filename.size() - 8), courseMap);
-            std::string dept = filename.substr(10, filename.size() - 18);
-            for (char& c : dept) {
-                if (c == '_') {
-                    c = ' ';
-                }
-            }
+        const std::string prefix = "./Courses/", suffix = "_prereqs.txt";
+        size_t psz = prefix.size(), ssz = suffix.size();
+        if (filename.substr(filename.size() - ssz) == suffix) {
+            loadFile(filename.substr(0, filename.size() - ssz), courseMap);
+            std::string dept = filename.substr(psz, filename.size() - psz - ssz);
+            replace(dept.begin(), dept.end(), '_', ' ');
             departments.insert(dept);
         }
     }
     // Load in the user info 
     User user(courseMap, "user.txt");
-
     std::string input;
     while (getline(std::cin, input)) {
         auto [cmd, args] = parseInput(input);
@@ -209,9 +223,14 @@ int main() {
                 break;
             case PREREQ:
                 if (!args.empty() && courseMap.find(args[0]) != courseMap.end()) {
-                    std::cout << "You need the following:" << std::endl;
-                    for (Course*& course : courseMap[args[0]]->getAllPrereqs()) {
-                        std::cout << "* " << course->getName() << std::endl;
+                    if (courseMap[args[0]]->getAllPrereqs().size() == 0) {
+                        std::cout << "There are no requirements to take this class." << std::endl;
+                    }
+                    else {
+                        std::cout << "You need the following:" << std::endl;
+                        for (Course*& course : courseMap[args[0]]->getAllPrereqs()) {
+                            std::cout << "* " << course->getName() << std::endl;
+                        }
                     }
                 }
                 else {
