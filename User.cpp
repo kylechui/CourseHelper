@@ -11,7 +11,7 @@ User::User(const std::unordered_map<std::string, Course*>& courseMap, const std:
     userInfo.close();
 }
 
-std::set<Course*> User::getTakenCourses() {
+std::set<const Course*> User::getTakenCourses() const {
     return m_takenCourses;
 }
 
@@ -37,32 +37,32 @@ void User::removeCourses(const std::unordered_map<std::string, Course*>& courseM
         m_takenCourses.erase(courseMap.at(name));
     }
     std::ofstream userInfo(m_file, std::ios::ate);
-    for (Course* course : m_takenCourses) {
+    for (const Course* course : m_takenCourses) {
         userInfo << course->getName() << '\n';
     }
     userInfo.close();
 }
 
-void User::printTakenCourses() {
+void User::printTakenCourses() const {
     std::cout << "You have taken:" << std::endl;
-    for (Course* course : m_takenCourses) {
+    for (const Course* course : m_takenCourses) {
         std::cout << course->getName() << std::endl;
     }
 }
 
-bool User::hasTaken(Course* const& course) {
+bool User::hasTaken(const Course*& course) const {
     return m_takenCourses.find(course) != m_takenCourses.end();
 }
 
-bool User::hasAllPrereqs(Course* const& course) {
-    for (Course* const& prereq : course->getPrereqs()) {
+bool User::hasAllPrereqs(const Course*& course) const {
+    for (const Course* prereq : course->getPrereqs()) {
         if (m_takenCourses.find(prereq) == m_takenCourses.end()) {
             return false;
         }
     }
-    for (const std::set<Course*>& choice : course->getChoices()) {
+    for (const std::set<const Course*>& choice : course->getChoices()) {
         bool has = false;
-        for (Course* const& option : choice) {
+        for (const Course* option : choice) {
             if (m_takenCourses.find(option) != m_takenCourses.end()) {
                 has = true;
                 break;

@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <unordered_map>
 #include <vector>
 #include "utils.hpp"
 #include "Course.hpp"
@@ -19,6 +20,25 @@ void printHelpMessage() {
     };
     for (auto& [cmd, desc] : helpMessage) {
         std::cout << std::left << std::setw(25) << cmd << ' ' << desc << std::endl;
+    }
+}
+
+void printAvailableCourses(const std::unordered_map<std::string, Course*>& courseMap, const User& user, const std::string& dept) {
+    std::vector<const Course*> availableCourses;
+    for (const auto& [name, course] : courseMap) {
+        if (!isPrefix(name, dept)) {
+            continue;
+        }
+        // TODO: Figure out how to avoid creating a new pointer here
+        const Course* tmp = course;
+        if (!user.hasTaken(tmp) && user.hasAllPrereqs(tmp)) {
+            availableCourses.push_back(course);
+        }
+    }
+    sort(begin(availableCourses), end(availableCourses));
+    std::cout << "Here's a list of courses you can take in the " + dept + " department:" << std::endl;
+    for (const Course* c : availableCourses) {
+        std::cout << "* " << c->getName() << std::endl;
     }
 }
 
@@ -96,7 +116,7 @@ void loadFile(const std::string& pathPrefix, std::unordered_map<std::string, Cou
             }
             if (isChoice) {
                 std::vector<std::string> choiceNames = split(component, '|');
-                std::set<Course*> choices;
+                std::set<const Course*> choices;
                 for (std::string& choiceName : choiceNames) {
                     choiceName = trimWhitespace(choiceName);
                     if (isID(choiceName)) {
@@ -108,7 +128,7 @@ void loadFile(const std::string& pathPrefix, std::unordered_map<std::string, Cou
             }
             else if (isPathway) {
                 std::vector<std::string> pathwayNames = split(component, ',');
-                std::set<Course*> pathways;
+                std::set<const Course*> pathways;
                 for (std::string& pathwayName : pathwayNames) {
                     pathwayName = trimWhitespace(pathwayName);
                     if (isID(pathwayName)) {
@@ -175,7 +195,7 @@ int main() {
     User user(courseMap, "user.txt");
     std::string input;
     while (getline(std::cin, input)) {
-        auto [cmd, args] = parseInput(input);
+        const auto [cmd, args] = parseInput(input);
         // Check if the input command is valid or not
         if (validInputs.find(cmd) == validInputs.end()) {
             std::cout << "Invalid input. Type `help' for a list of commands." << std::endl;
@@ -186,20 +206,7 @@ int main() {
             case AVAILABLE:
                 // TODO: Add code to list all available classes based on DAG
                 if (!args.empty() && departments.find(args[0]) != departments.end()) {
-                    std::vector<Course*> availableCourses;
-                    for (const auto& [name, course] : courseMap) {
-                        if (!isPrefix(name, args[0])) {
-                            continue;
-                        }
-                        if (!user.hasTaken(course) && user.hasAllPrereqs(course)) {
-                            availableCourses.push_back(course);
-                        }
-                    }
-                    sort(begin(availableCourses), end(availableCourses));
-                    std::cout << "Here's a list of courses you can take in the " + args[0] + " department:" << std::endl;
-                    for (Course*& c : availableCourses) {
-                        std::cout << "* " << c->getName() << std::endl;
-                    }
+                    printAvailableCourses(courseMap, user, args[0]);
                 }
                 else {
                     std::cout << "Department not found. Please try again." << std::endl;
@@ -223,15 +230,7 @@ int main() {
                 break;
             case PREREQ:
                 if (!args.empty() && courseMap.find(args[0]) != courseMap.end()) {
-                    if (courseMap[args[0]]->getAllPrereqs().size() == 0) {
-                        std::cout << "There are no requirements to take this class." << std::endl;
-                    }
-                    else {
-                        std::cout << "You need the following:" << std::endl;
-                        for (Course*& course : courseMap[args[0]]->getAllPrereqs()) {
-                            std::cout << "* " << course->getName() << std::endl;
-                        }
-                    }
+                    courseMap[args[0]]->printPrereqs();
                 }
                 else {
                     std::cout << "Course not found. Please try again." << std::endl;
