@@ -18,6 +18,18 @@ void trim(std::string& s) {
     }
 }
 
+bool isPrefix(const std::string& s, const std::string& prefix) {
+    if (prefix.size() > s.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < prefix.size(); i++) {
+        if (prefix[i] != s[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 std::pair<std::string, std::vector<std::string>> parseInput(const std::string& input) {
     std::string cmd;
     std::vector<std::string> args;
@@ -51,16 +63,16 @@ void printHelpMessage() {
         { "help", "Shows this list of all commands" },
         { "exit", "Exits the program" },
         { "", "" },
-        { "available", "Shows list of courses that are currently available" },
         { "list", "Shows list of courses that have already been taken" },
         { "add [course]", "Adds course to the courses database" },
         { "take [course]", "Adds course to the list of taken courses" },
-        { "info [ID]", "Shows information about a given course ID" },
-        { "prereq [ID]", "Lists all prereqs needed to take a given course ID" },
+        { "info [course]", "Shows information about a given course" },
+        { "prereq [course]", "Lists all prereqs needed to take a given course" },
+        { "available [department]", "Shows list of courses that are currently available" },
         { "update [department]", "Updates course information for a given department" },
     };
     for (auto& [cmd, desc] : helpMessage) {
-        std::cout << std::left << std::setw(15) << cmd << ' ' << desc << std::endl;
+        std::cout << std::left << std::setw(25) << cmd << ' ' << desc << std::endl;
     }
 }
 
@@ -98,8 +110,7 @@ void printInfo(Course* const course) {
     std::cout << "========================================" << std::endl;
 }
 
-// TODO: Write DFS function to get *all* prereqs
-std::unordered_set<Course*> getAllPrereqs(Course*& course) {
+std::vector<Course*> getAllPrereqs(Course*& course) {
     std::unordered_set<Course*> processed;
     auto dfs = [&processed](Course*& cur, auto&& dfs) -> void {
         processed.insert(cur);
@@ -110,7 +121,10 @@ std::unordered_set<Course*> getAllPrereqs(Course*& course) {
         }
     };
     dfs(course, dfs);
-    return processed;
+    processed.erase(course);
+    std::vector<Course*> sorted(processed.begin(), processed.end());
+    sort(begin(sorted), end(sorted));
+    return sorted;
 }
 
 // TODO: Fix parsing when ( and ) are involved
@@ -142,7 +156,7 @@ void loadFile(const std::string& prefix, std::unordered_map<std::string, Course*
         }
         // Parse prereq and add the corresponding prereqs to the current Course
         prereq.push_back(',');
-        int i = 0;
+        size_t i = 0;
         std::string prereqName;
         while (i < prereq.size()) {
             bool isChoice = false;
@@ -155,7 +169,7 @@ void loadFile(const std::string& prefix, std::unordered_map<std::string, Course*
                 prereqName += " |";
                 std::set<Course*> choices;
                 std::string curPrereqName;
-                int j = 0;
+                size_t j = 0;
                 while (j < prereqName.size()) {
                     if (prereqName[j] == '|') {
                         // Trim trailing whitespace
@@ -223,16 +237,24 @@ int main() {
         { "take", TAKE },
         { "update", UPDATE },
     };
-    // Load in the user info 
-    User user("user.txt");
     // Load in prerequisite info from local text files
     std::unordered_map<std::string, Course*> courseMap;
+    std::unordered_set<std::string> departments;
     for (auto& entry : std::filesystem::directory_iterator("./Courses")) {
         std::string filename = std::string(entry.path());
         if (filename.substr(filename.size() - 8) == "_IDs.txt") {
             loadFile(filename.substr(0, filename.size() - 8), courseMap);
+            std::string dept = filename.substr(10, filename.size() - 18);
+            for (char& c : dept) {
+                if (c == '_') {
+                    c = ' ';
+                }
+            }
+            departments.insert(dept);
         }
     }
+    // Load in the user info 
+    User user("user.txt");
 
     std::string input;
     while (getline(std::cin, input)) {
@@ -247,6 +269,26 @@ int main() {
         switch (validInputs.at(cmd)) {
             case AVAILABLE:
                 // TODO: Add code to list all available classes based on DAG
+                if (!args.empty() && departments.find(args[0]) != departments.end()) {
+                    std::vector<Course*> availableCourses;
+                    for (const auto& [name, course] : courseMap) {
+                        if (!isPrefix(name, args[0])) {
+                            continue;
+                        }
+                        if (!user.hasTaken(course) && user.hasAllPrereqs(course)) {
+                            availableCourses.push_back(course);
+                        }
+                    }
+                    sort(begin(availableCourses), end(availableCourses));
+                    std::cout << "Here's a list of courses you can take in the " + args[0] + " department:" << std::endl;
+                    for (Course*& c : availableCourses) {
+                        std::cout << "* " << c->getName() << std::endl;
+                    }
+                }
+                else {
+                    std::cout << "Department not found. Please try again." << std::endl;
+                }
+                break;
             case EXIT:
                 return 0;
             case HELP:
@@ -266,7 +308,7 @@ int main() {
             case PREREQ:
                 if (!args.empty() && courseMap.find(args[0]) != courseMap.end()) {
                     std::cout << "You need the following:" << std::endl;
-                    for (Course* course : getAllPrereqs(courseMap[args[0]])) {
+                    for (Course*& course : getAllPrereqs(courseMap[args[0]])) {
                         std::cout << "* " << course->getName() << std::endl;
                     }
                 }
@@ -285,7 +327,7 @@ int main() {
                 }
                 break;
             case UPDATE:
-                std::system(("python3 ./scraper.py " + args[0]).c_str());
+                std::ignore = std::system(("python3 ./scraper.py " + args[0]).c_str());
                 break;
         }
     }

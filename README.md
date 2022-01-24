@@ -21,11 +21,11 @@ Just C++17 is strictly necessary for using this project :)
 ## Commands
 - [X] `help`: Shows this list of all commands
 - [X] `exit`: Exits the program
-- [ ] `available`: Shows list of courses that are currently available
 - [X] `list`: Shows list of courses that have already been taken
 - [X] `take [course]`: Adds course to the list of taken courses
-- [X] `info [ID]`: Shows information about a given course ID
-- [X] `prereq [ID]`: Lists all prereqs needed to take a given course ID
+- [X] `info [course]`: [WIP] Shows information about a given course
+- [X] `prereq [course]`: [WIP] Lists all prereqs needed to take a given course
+- [X] `available [department]`: Shows list of courses that are currently available
 - [X] `update [department]`: Updates course information for a given department
 
 ## Examples
@@ -62,9 +62,11 @@ a simpler manner, feel free to open an issue!
   taken
 - [ ] Implement command that gives the user information about a certain class:
   - [X] Course ID/name/description
-  - [ ] [WIP] List of pre-requisite courses necessary to take that class
+  - [X] List of pre-requisite courses necessary to take that class
   - [ ] Whether or not the user can take that class, and if not, which courses
     are still needed to take it
+- [ ] Store all user data in a folder 
+  - [ ] Allow users to have blacklists in addition to courses taken
 - [ ] Add aliases for the departments and make them case-insensitive
 - [ ] Visualizer for the course graph
 - [X] Web scraping to automatically generate the input data
