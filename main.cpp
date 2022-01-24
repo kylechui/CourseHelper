@@ -83,27 +83,36 @@ Course* getCourse(const std::string& name, std::unordered_map<std::string, Cours
     return new Course(name);
 }
 
-void printInfo(Course* const course) {
+void printInfo(Course* const& course, User& user) {
     std::vector<Course*> prereqs = course->getPrereqs();
     std::vector<std::set<Course*>> choices = course->getChoices();
     std::cout << course->getName() << std::endl << std::endl;
     std::cout << course->getDescription() << std::endl << std::endl;
     // Print prereq information
-    if (prereqs.size() == 0 && choices.size() == 0) {
-        std::cout << "There are no requirements for this class." << std::endl;
+    if (user.hasTaken(course)) {
+        std::cout << "You have already taken this class." << std::endl;
     }
-    if (prereqs.size() != 0) {
-        std::cout << "You must take the following courses:" << std::endl;
-        for (Course* prereq : prereqs) {
-            std::cout << "* " << prereq->getName() << std::endl;
+    else if (user.hasAllPrereqs(course)) {
+        std::cout << "You can take this class next quarter!" << std::endl;
+    }
+    else {
+        if (prereqs.size() == 0 && choices.size() == 0) {
+            std::cout << "There are no requirements for this class." << std::endl;
         }
-    }
-    if (choices.size() != 0) {
-        // TODO: Come up with better var name (maybe)
-        for (std::set<Course*>& st : choices) {
-            std::cout << "You may choose at least one from the following:" << std::endl;
-            for (Course* prereq : st) {
-                std::cout << "- " << prereq->getName() << std::endl;
+        if (prereqs.size() != 0) {
+            std::cout << "You still need to take the following courses:" << std::endl;
+            for (Course* prereq : prereqs) {
+                if (!user.hasTaken(prereq)) {
+                    std::cout << "* " << prereq->getName() << std::endl;
+                }
+            }
+        }
+        if (choices.size() != 0) {
+            for (std::set<Course*>& choice : choices) {
+                std::cout << "You may choose at least one from the following:" << std::endl;
+                for (Course* prereq : choice) {
+                    std::cout << "- " << prereq->getName() << std::endl;
+                }
             }
         }
     }
@@ -296,7 +305,7 @@ int main() {
                 break;
             case INFO:
                 if (!args.empty() && courseMap.find(args[0]) != courseMap.end()) {
-                    printInfo(courseMap[args[0]]);
+                    printInfo(courseMap[args[0]], user);
                 }
                 else {
                     std::cout << "Course not found. Please try again." << std::endl;
