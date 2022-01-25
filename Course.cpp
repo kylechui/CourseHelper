@@ -1,31 +1,25 @@
-#include <bits/stdc++.h>
-#include <memory>
-#include "utils.hpp"
 #include "Course.hpp"
-#include "User.hpp"
 
-Course::Course(const std::string& name) :
-    m_name(name) {
-        m_description = "No description provided.";
+#include <bits/stdc++.h>
+
+#include "User.hpp"
+#include "utils.hpp"
+
+Course::Course(const std::string& name) : m_name(name) {
+    m_description = "No description provided.";
 }
 
 Course::~Course() {
     for (const Course* p : m_prereqs) {
-        delete(p);
+        delete (p);
     }
 }
 
-std::string Course::getName() const {
-    return m_name;
-}
+std::string Course::getName() const { return m_name; }
 
-std::string Course::getDescription() const {
-    return m_description;
-}
+std::string Course::getDescription() const { return m_description; }
 
-std::vector<const Course*> Course::getPrereqs() const {
-    return m_prereqs;
-}
+std::vector<const Course*> Course::getPrereqs() const { return m_prereqs; }
 
 std::vector<std::set<const Course*>> Course::getChoices() const {
     return m_choices;
@@ -58,9 +52,7 @@ void Course::setDescription(const std::string& description) {
     m_description = description;
 }
 
-void Course::addPrereq(const Course* prereq) {
-    m_prereqs.push_back(prereq);
-}
+void Course::addPrereq(const Course* prereq) { m_prereqs.push_back(prereq); }
 
 void Course::addChoice(std::set<const Course*>& choice) {
     m_choices.push_back(choice);
@@ -74,20 +66,22 @@ void Course::addPathway(std::set<const Course*>& pathway) {
 void Course::printInfo(const User& user) const {
     std::cout << m_name << std::endl << std::endl;
     std::cout << m_description << std::endl << std::endl;
-    // TODO: Figure out how to use the this pointer without defining a new pointer
+    // TODO: Figure out how to use the this pointer without defining a new
+    // pointer
     const Course* tmp;
     if (user.hasTaken(tmp)) {
         std::cout << "You have already taken this class." << std::endl;
-    }
-    else if (user.hasAllPrereqs(tmp)) {
+    } else if (user.hasAllPrereqs(tmp)) {
         std::cout << "You can take this class next quarter!" << std::endl;
-    }
-    else {
-        if (m_prereqs.size() == 0 && m_choices.size() == 0 && m_pathways.size() == 0) {
-            std::cout << "There are no requirements for this class." << std::endl;
+    } else {
+        if (m_prereqs.size() == 0 && m_choices.size() == 0 &&
+            m_pathways.size() == 0) {
+            std::cout << "There are no requirements for this class."
+                      << std::endl;
         }
         if (m_prereqs.size() != 0) {
-            std::cout << "You still need to take all of the following courses:" << std::endl;
+            std::cout << "You still need to take all of the following courses:"
+                      << std::endl;
             for (const Course* prereq : m_prereqs) {
                 if (!user.hasTaken(prereq)) {
                     std::cout << "* " << prereq->getName() << std::endl;
@@ -95,7 +89,9 @@ void Course::printInfo(const User& user) const {
             }
         }
         if (m_choices.size() != 0) {
-            std::cout << "You must choose at least one class from each of the following rows:" << std::endl;
+            std::cout << "You must choose at least one class from each of the "
+                         "following rows:"
+                      << std::endl;
             for (const std::set<const Course*>& choice : m_choices) {
                 std::vector<std::string> choiceNames;
                 for (const Course* course : choice) {
@@ -105,7 +101,9 @@ void Course::printInfo(const User& user) const {
             }
         }
         if (m_pathways.size() != 0) {
-            std::cout << "You must choose all classes from at least one of the following rows:" << std::endl;
+            std::cout << "You must choose all classes from at least one of the "
+                         "following rows:"
+                      << std::endl;
             for (const std::set<const Course*>& pathway : m_pathways) {
                 std::vector<std::string> pathwayNames;
                 for (const Course* course : pathway) {
@@ -120,9 +118,9 @@ void Course::printInfo(const User& user) const {
 
 void Course::printPrereqs() const {
     if (this->getAllPrereqs().size() == 0) {
-        std::cout << "There are no requirements to take this class." << std::endl;
-    }
-    else {
+        std::cout << "There are no requirements to take this class."
+                  << std::endl;
+    } else {
         std::cout << "You need the following:" << std::endl;
         for (const Course* course : this->getAllPrereqs()) {
             std::cout << "* " << course->getName() << std::endl;

@@ -1,8 +1,12 @@
-#include <bits/stdc++.h>
 #include "User.hpp"
+
+#include <bits/stdc++.h>
+
 #include "Course.hpp"
 
-User::User(const std::unordered_map<std::string, Course*>& courseMap, const std::string& file) : m_file(file) {
+User::User(const std::unordered_map<std::string, Course*>& courseMap,
+           const std::string& file)
+    : m_file(file) {
     std::ifstream userInfo(m_file, std::ifstream::in);
     std::string name;
     while (getline(userInfo, name)) {
@@ -11,15 +15,15 @@ User::User(const std::unordered_map<std::string, Course*>& courseMap, const std:
     userInfo.close();
 }
 
-std::set<const Course*> User::getTakenCourses() const {
-    return m_takenCourses;
-}
+std::set<const Course*> User::getTakenCourses() const { return m_takenCourses; }
 
-void User::addCourses(const std::unordered_map<std::string, Course*>& courseMap, const std::vector<std::string>& courseNames) {
-    std::ofstream userInfo(m_file, std::ios::ate|std::ios::app);
+void User::addCourses(const std::unordered_map<std::string, Course*>& courseMap,
+                      const std::vector<std::string>& courseNames) {
+    std::ofstream userInfo(m_file, std::ios::ate | std::ios::app);
     for (const std::string& name : courseNames) {
         if (courseMap.find(name) == courseMap.end()) {
-            std::cout << "Course \"" + name + "\" not found, try again." << std::endl;
+            std::cout << "Course \"" + name + "\" not found, try again."
+                      << std::endl;
             continue;
         }
         m_takenCourses.insert(courseMap.at(name));
@@ -28,10 +32,13 @@ void User::addCourses(const std::unordered_map<std::string, Course*>& courseMap,
     userInfo.close();
 }
 
-void User::removeCourses(const std::unordered_map<std::string, Course*>& courseMap, const std::vector<std::string>& courseNames) {
+void User::removeCourses(
+    const std::unordered_map<std::string, Course*>& courseMap,
+    const std::vector<std::string>& courseNames) {
     for (const std::string& name : courseNames) {
         if (courseMap.find(name) == courseMap.end()) {
-            std::cout << "Course \"" + name + "\" not found, try again." << std::endl;
+            std::cout << "Course \"" + name + "\" not found, try again."
+                      << std::endl;
             continue;
         }
         m_takenCourses.erase(courseMap.at(name));

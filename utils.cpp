@@ -1,5 +1,6 @@
-#include <bits/stdc++.h>
 #include "utils.hpp"
+
+#include <bits/stdc++.h>
 
 /**
  * Removes leading and trailing whitespace from a string.
@@ -30,8 +31,7 @@ std::vector<std::string> split(const std::string& src, const char& delimiter) {
         if (c == delimiter) {
             components.emplace_back(component);
             component.clear();
-        }
-        else {
+        } else {
             component.push_back(c);
         }
     }
@@ -47,7 +47,8 @@ std::vector<std::string> split(const std::string& src, const char& delimiter) {
  * @param delimiter the delimiter to be inserted between components.
  * @return the components joined by delimiter.
  */
-std::string join(const std::vector<std::string>& components, const std::string& delimiter) {
+std::string join(const std::vector<std::string>& components,
+                 const std::string& delimiter) {
     std::string result;
     for (size_t i = 0; i < components.size() - 1; i++) {
         result += components[i];
@@ -95,12 +96,14 @@ bool isID(const std::string& src) {
  * @return cmd the first "word" in input, delimited by whitespace.
  * @return args a list of strings, delimited by commas (`,`).
  */
-std::pair<std::string, std::vector<std::string>> parseInput(const std::string& src) {
-    int spaceIndex = src.find(' ') == std::string::npos ? src.size() : src.find(' ');
+std::pair<std::string, std::vector<std::string>> parseInput(
+    const std::string& src) {
+    int spaceIndex =
+        src.find(' ') == std::string::npos ? src.size() : src.find(' ');
     std::string cmd = src.substr(0, spaceIndex);
     std::vector<std::string> args = split(src.substr(spaceIndex), ',');
     for (std::string& arg : args) {
         arg = trimWhitespace(arg);
     }
-    return { cmd, args };
+    return {cmd, args};
 }

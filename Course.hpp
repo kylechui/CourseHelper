@@ -5,7 +5,7 @@
 class User;
 
 class Course {
-public:
+   public:
     Course(const std::string& name);
     ~Course();
     std::string getName() const;
@@ -20,7 +20,8 @@ public:
     void addPathway(std::set<const Course*>& pathway);
     void printInfo(const User& user) const;
     void printPrereqs() const;
-private:
+
+   private:
     const std::string m_name;
     std::string m_description;
     std::vector<const Course*> m_prereqs;
