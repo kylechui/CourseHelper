@@ -59,27 +59,5 @@ tried](https://github.com/kylechui/CourseHelper/blob/4624247913b1b03347b7efa801a
 If you've found an alternate website that lists these relationships in a simpler
 manner, feel free to open an issue!
 
-## TODO/Short Term Ideas
-- [ ] Make all queries case-insensitive
-- [X] Add user information file that contains list of completed courses
-  - [ ] Update the `user` command to allow you to "logout" and "login" as other
-    users `user` and `user [username]`. Store data in `username.txt`
-  - [ ] Allow each user to define their own set of aliases and blacklisted
-    classes
-- [X] Implement interactive command that allows the user to add/remove courses
-  from their own list
-- [X] Web scraping to automatically generate the input text files
-- [X] Read the course data from the input files in `Courses/` and store them in
-  `Course` class objects
-- [X] Implement command that gives the user a list of all classes that can be
-  taken
-- [X] Implement command that gives the user information about a certain class:
-  - [X] Course ID/name/description
-  - [X] List of pre-requisite courses necessary to take that class
-  - [X] Whether or not the user has taken the class, whether or not the user can take that class, which courses are still needed to take it
-
-## Long Term Goals
-- [ ] Visualizer for the course graph
-- [ ] Turn this into a web app
-- [ ] Automagically get the course requisite graph into a local database via
-  RegExp parsing or a friendlier website
+## TODO/Goals
+This section has been moved to [the wiki](https://github.com/kylechui/CourseHelper/wiki/Goals-for-the-future-of-this-project).
