@@ -16,8 +16,20 @@ Course::Course(const std::string &name) {
 }
 
 Course::~Course() {
-    for (Course *p : m_prereqs) {
-        delete (p);
+    for (Course *c : m_prereqs) {
+        delete (c);
+    }
+    for (std::vector<Course *> &choice : m_choices) {
+        for (Course *c : choice) {
+            delete (c);
+        }
+    }
+    for (std::vector<std::vector<Course *>> &pathway : m_pathways) {
+        for (std::vector<Course *> &choice : pathway) {
+            for (Course *c : choice) {
+                delete (c);
+            }
+        }
     }
 }
 
@@ -31,27 +43,36 @@ std::vector<std::vector<Course *>> Course::getChoices() const {
     return m_choices;
 }
 
-std::vector<std::vector<Course *>> Course::getPathways() const {
+std::vector<std::vector<std::vector<Course *>>> Course::getPathways() const {
     return m_pathways;
 }
 
-// TODO: change output to a tuple with mandatory, choices, pathways as vectors
-std::vector<Course *> Course::getAllPrereqs() const {
-    std::unordered_set<Course *> processed;
-    auto dfs = [&processed](Course *&cur, auto &&dfs) -> void {
-        processed.insert(cur);
-        for (Course *&prereq : cur->getPrereqs()) {
-            if (processed.find(prereq) == processed.end()) {
+std::tuple<std::vector<Course *>, std::vector<std::vector<Course *>>,
+           std::vector<std::vector<std::vector<Course *>>>>
+Course::getAllPrereqs() {
+    std::unordered_set<Course *> required;
+    std::vector<std::vector<Course *>> choices;
+    std::vector<std::vector<std::vector<Course *>>> pathways;
+    auto dfs = [&required, &choices, &pathways](Course *cur,
+                                                auto &&dfs) -> void {
+        required.insert(cur);
+        for (std::vector<Course *> &choice : cur->getChoices()) {
+            choices.push_back(choice);
+        }
+        for (std::vector<std::vector<Course *>> &pathway : cur->getPathways()) {
+            pathways.push_back(pathway);
+        }
+        for (Course *prereq : cur->getPrereqs()) {
+            if (required.find(prereq) == required.end()) {
                 dfs(prereq, dfs);
             }
         }
     };
-    for (Course *prereq : m_prereqs) {
-        dfs(prereq, dfs);
-    }
-    std::vector<Course *> sorted(processed.begin(), processed.end());
+    dfs(this, dfs);
+    required.erase(this);
+    std::vector<Course *> sorted(required.begin(), required.end());
     sort(begin(sorted), end(sorted));
-    return sorted;
+    return {sorted, choices, pathways};
 }
 
 void Course::setDescription(const std::string &description) {
@@ -64,7 +85,7 @@ void Course::addChoice(std::vector<Course *> &choice) {
     m_choices.push_back(choice);
 }
 
-void Course::addPathway(std::vector<Course *> &pathway) {
+void Course::addPathway(std::vector<std::vector<Course *>> &pathway) {
     m_pathways.push_back(pathway);
 }
 
@@ -104,29 +125,56 @@ void Course::printInfo(User &user) {
             }
         }
         if (m_pathways.size() != 0) {
-            std::cout << "You must choose all classes from at least one of the "
-                         "following rows:"
-                      << std::endl;
-            for (const std::vector<Course *> &pathway : m_pathways) {
-                std::vector<std::string> pathwayNames;
-                for (Course *course : pathway) {
-                    pathwayNames.emplace_back(course->getName());
+            for (const std::vector<std::vector<Course *>> &pathways :
+                 m_pathways) {
+                std::cout
+                    << "You must choose all classes from at least one of the "
+                       "following rows:"
+                    << std::endl;
+                for (const std::vector<Course *> &pathway : pathways) {
+                    std::vector<std::string> pathwayNames;
+                    for (Course *course : pathway) {
+                        pathwayNames.emplace_back(course->getName());
+                    }
+                    std::cout << "* " << join(pathwayNames, ", ") << std::endl;
                 }
-                std::cout << "* " << join(pathwayNames, ", ") << std::endl;
             }
         }
     }
     std::cout << std::endl;
 }
 
-void Course::printPrereqs() const {
-    if (this->getAllPrereqs().size() == 0) {
+void Course::printPrereqs() {
+    auto [required, choices, allPathways] = this->getAllPrereqs();
+    if (required.size() == 0 && choices.size() == 0 &&
+        allPathways.size() == 0) {
         std::cout << "There are no requirements to take this class."
                   << std::endl;
     } else {
-        std::cout << "You need the following:" << std::endl;
-        for (Course *course : this->getAllPrereqs()) {
-            std::cout << "* " << course->getName() << std::endl;
+        if (required.size() != 0) {
+            std::cout << "You need the following:" << std::endl;
+            for (Course *course : required) {
+                std::cout << "* " << course->getName() << std::endl;
+            }
+        }
+        if (choices.size() != 0) {
+            std::cout << "You need to take at least one class from each of "
+                         "the following rows:"
+                      << std::endl;
+            for (std::vector<Course *> &choice : choices) {
+                std::cout << "* " << joinNames(choice, ", ") << std::endl;
+            }
+        }
+        if (allPathways.size() != 0) {
+            for (std::vector<std::vector<Course *>> &pathways : allPathways) {
+                std::cout
+                    << "You need to take all the classes from at least one "
+                       "of the following rows:"
+                    << std::endl;
+                for (std::vector<Course *> &pathway : pathways) {
+                    std::cout << "* " << joinNames(pathway, ", ") << std::endl;
+                }
+            }
         }
     }
 }

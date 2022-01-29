@@ -20,7 +20,7 @@ void printHelpMessage() {
         {"update [department]",
          "Updates course information for a given department"},
     };
-    for (auto &[cmd, desc] : helpMessage) {
+    for (const auto &[cmd, desc] : helpMessage) {
         std::cout << std::left << std::setw(25) << cmd << ' ' << desc
                   << std::endl;
     }
@@ -30,6 +30,7 @@ void printAvailableCourses(
     const std::unordered_map<std::string, Course *> &courseMap, User &user,
     const std::string &dept) {
     std::vector<const Course *> availableCourses;
+
     for (const auto &[name, course] : courseMap) {
         if (!isPrefix(name, dept)) {
             continue;
@@ -97,7 +98,6 @@ void loadFile(const std::string &pathPrefix,
                 depth++;
             } else if (c == ')') {
                 depth--;
-
             } else {
                 component.push_back(c);
             }
@@ -134,17 +134,23 @@ void loadFile(const std::string &pathPrefix,
                 }
                 curCourse->addChoice(choices);
             } else if (isPathway) {
-                std::vector<std::string> pathwayNames = split(component, ',');
-                std::vector<Course *> pathways;
+                std::vector<std::string> pathwayNames = split(component, '|');
+                std::vector<std::vector<Course *>> allPathways;
                 for (std::string &pathwayName : pathwayNames) {
-                    pathwayName = trimWhitespace(pathwayName);
-                    if (isID(pathwayName)) {
-                        pathwayName = dept + ' ' + pathwayName;
+                    std::vector<Course *> pathways;
+                    std::vector<std::string> pathwayComponent =
+                        split(pathwayName, ',');
+                    for (std::string &tmp : pathwayComponent) {
+                        tmp = trimWhitespace(tmp);
+                        if (isID(tmp)) {
+                            tmp = dept + ' ' + tmp;
+                        }
+                        pathways.emplace_back(
+                            getCourse(courseMap, trimWhitespace(tmp)));
                     }
-                    pathways.emplace_back(
-                        getCourse(courseMap, trimWhitespace(pathwayName)));
+                    allPathways.emplace_back(pathways);
                 }
-                curCourse->addPathway(pathways);
+                curCourse->addPathway(allPathways);
             } else {
                 component = trimWhitespace(component);
                 if (isID(component)) {
@@ -184,7 +190,7 @@ int main() {
     for (auto &entry : std::filesystem::directory_iterator("./Courses")) {
         std::string filename = std::string(entry.path());
         const std::string prefix = "./Courses/", suffix = "_prereqs.txt";
-        size_t psz = prefix.size(), ssz = suffix.size();
+        const size_t psz = prefix.size(), ssz = suffix.size();
         if (filename.substr(filename.size() - ssz) == suffix) {
             loadFile(filename.substr(0, filename.size() - ssz), courseMap);
             std::string dept =

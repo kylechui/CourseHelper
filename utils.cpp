@@ -2,6 +2,8 @@
 
 #include <bits/stdc++.h>
 
+#include "Course.hpp"
+
 /**
  * Removes leading and trailing whitespace from a string.
  * @param s the input string.
@@ -55,6 +57,17 @@ std::string join(const std::vector<std::string>& components,
         result += delimiter;
     }
     result += components.back();
+    return result;
+}
+
+std::string joinNames(const std::vector<Course*>& courses,
+                      const std::string& delimiter) {
+    std::string result;
+    for (size_t i = 0; i < courses.size() - 1; i++) {
+        result += courses[i]->getName();
+        result += delimiter;
+    }
+    result += courses.back()->getName();
     return result;
 }
 

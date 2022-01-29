@@ -63,12 +63,13 @@ bool User::hasTaken(Course *course) {
 }
 
 bool User::hasAllPrereqs(Course *course) {
-    for (Course *prereq : course->getPrereqs()) {
+    auto [required, choices, allPathways] = course->getAllPrereqs();
+    for (Course *prereq : required) {
         if (m_takenCourses.find(prereq) == m_takenCourses.end()) {
             return false;
         }
     }
-    for (std::vector<Course *> &choice : course->getChoices()) {
+    for (std::vector<Course *> &choice : choices) {
         bool has = false;
         for (Course *option : choice) {
             if (m_takenCourses.find(option) != m_takenCourses.end()) {
@@ -77,6 +78,25 @@ bool User::hasAllPrereqs(Course *course) {
             }
         }
         if (!has) {
+            return false;
+        }
+    }
+    for (std::vector<std::vector<Course *>> &pathways : allPathways) {
+        bool hasPathway = false;
+        for (std::vector<Course *> &pathway : pathways) {
+            bool hasAll = true;
+            for (Course *option : pathway) {
+                if (m_takenCourses.find(option) == m_takenCourses.end()) {
+                    hasAll = false;
+                    break;
+                }
+            }
+            if (hasAll) {
+                hasPathway = true;
+                break;
+            }
+        }
+        if (!hasPathway) {
             return false;
         }
     }

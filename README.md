@@ -27,8 +27,8 @@ cd CourseHelper && make
 - [X] `exit`: Exits the program
 - [X] `list`: Shows list of courses that have already been taken
 - [X] `take [course]`: Adds course to the list of taken courses
-- [X] `info [course]`: [WIP] Shows information about a given course
-- [X] `prereq [course]`: [WIP] Lists all prereqs needed to take a given course
+- [X] `info [course]`:  Shows information about a given course
+- [X] `prereq [course]`:  Lists all prereqs needed to take a given course
 - [X] `available [department]`: Shows list of courses that are currently available
 - [X] `update [department]`: Updates course information for a given department
 
@@ -60,7 +60,8 @@ If you've found an alternate website that lists these relationships in a simpler
 manner, feel free to open an issue!
 
 ## TODO/Goals
-This section has been moved to [the wiki](https://github.com/kylechui/CourseHelper/wiki/Goals-for-the-future-of-this-project).
+This section has been moved to [the
+wiki](https://github.com/kylechui/CourseHelper/wiki/Goals-for-the-future-of-this-project).
 
 ## Contributing
 Suggestions and contributions welcome through issues and pull requests! More
