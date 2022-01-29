@@ -10,6 +10,7 @@ void printHelpMessage() {
         {"exit", "Exits the program"},
         {"", ""},
         {"list", "Shows list of courses that have already been taken"},
+
         {"add [course]", "Adds course to the courses database"},
         {"take [course]", "Adds course to the list of taken courses"},
         {"info [course]", "Shows information about a given course"},
@@ -33,6 +34,7 @@ void printAvailableCourses(
         if (!isPrefix(name, dept)) {
             continue;
         }
+
         // TODO: Figure out how to avoid creating a new pointer here
         const Course *tmp = course;
         if (!user.hasTaken(tmp) && user.hasAllPrereqs(tmp)) {
@@ -97,6 +99,7 @@ void loadFile(const std::string &pathPrefix,
                 depth++;
             } else if (c == ')') {
                 depth--;
+
             } else {
                 component.push_back(c);
             }
@@ -123,24 +126,24 @@ void loadFile(const std::string &pathPrefix,
             }
             if (isChoice) {
                 std::vector<std::string> choiceNames = split(component, '|');
-                std::set<const Course *> choices;
+                std::vector<const Course *> choices;
                 for (std::string &choiceName : choiceNames) {
                     choiceName = trimWhitespace(choiceName);
                     if (isID(choiceName)) {
                         choiceName = dept + ' ' + choiceName;
                     }
-                    choices.insert(getCourse(courseMap, choiceName));
+                    choices.emplace_back(getCourse(courseMap, choiceName));
                 }
                 curCourse->addChoice(choices);
             } else if (isPathway) {
                 std::vector<std::string> pathwayNames = split(component, ',');
-                std::set<const Course *> pathways;
+                std::vector<const Course *> pathways;
                 for (std::string &pathwayName : pathwayNames) {
                     pathwayName = trimWhitespace(pathwayName);
                     if (isID(pathwayName)) {
                         pathwayName = dept + ' ' + pathwayName;
                     }
-                    pathways.insert(
+                    pathways.emplace_back(
                         getCourse(courseMap, trimWhitespace(pathwayName)));
                 }
                 curCourse->addPathway(pathways);

@@ -61,3 +61,8 @@ manner, feel free to open an issue!
 
 ## TODO/Goals
 This section has been moved to [the wiki](https://github.com/kylechui/CourseHelper/wiki/Goals-for-the-future-of-this-project).
+
+## Contributing
+Suggestions and contributions welcome through issues and pull requests! More
+information about the project can be found in the [the
+wiki](https://github.com/kylechui/CourseHelper/wiki).
