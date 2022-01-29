@@ -10,24 +10,24 @@ class Course {
     ~Course();
     std::string getName() const;
     std::string getDescription() const;
-    std::vector<const Course *> getPrereqs() const;
-    std::vector<std::vector<const Course *>> getChoices() const;
-    std::vector<std::vector<const Course *>> getPathways() const;
-    std::vector<const Course *> getAllPrereqs() const;
+    std::vector<Course *> getPrereqs() const;
+    std::vector<std::vector<Course *>> getChoices() const;
+    std::vector<std::vector<Course *>> getPathways() const;
+    std::vector<Course *> getAllPrereqs() const;
     void setDescription(const std::string &description);
-    void addPrereq(const Course *prereq);
-    void addChoice(std::vector<const Course *> &choice);
-    void addPathway(std::vector<const Course *> &pathway);
-    void printInfo(const User &user) const;
+    void addPrereq(Course *prereq);
+    void addChoice(std::vector<Course *> &choice);
+    void addPathway(std::vector<Course *> &pathway);
+    void printInfo(User &user);
     void printPrereqs() const;
 
    private:
     std::string m_department;
     std::string m_ID;
     std::string m_description;
-    std::vector<const Course *> m_prereqs;
-    std::vector<std::vector<const Course *>> m_choices;
-    std::vector<std::vector<const Course *>> m_pathways;
+    std::vector<Course *> m_prereqs;
+    std::vector<std::vector<Course *>> m_choices;
+    std::vector<std::vector<Course *>> m_pathways;
 };
 
 #endif

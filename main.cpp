@@ -27,17 +27,15 @@ void printHelpMessage() {
 }
 
 void printAvailableCourses(
-    const std::unordered_map<std::string, Course *> &courseMap,
-    const User &user, const std::string &dept) {
+    const std::unordered_map<std::string, Course *> &courseMap, User &user,
+    const std::string &dept) {
     std::vector<const Course *> availableCourses;
     for (const auto &[name, course] : courseMap) {
         if (!isPrefix(name, dept)) {
             continue;
         }
 
-        // TODO: Figure out how to avoid creating a new pointer here
-        const Course *tmp = course;
-        if (!user.hasTaken(tmp) && user.hasAllPrereqs(tmp)) {
+        if (!user.hasTaken(course) && user.hasAllPrereqs(course)) {
             availableCourses.push_back(course);
         }
     }
@@ -126,7 +124,7 @@ void loadFile(const std::string &pathPrefix,
             }
             if (isChoice) {
                 std::vector<std::string> choiceNames = split(component, '|');
-                std::vector<const Course *> choices;
+                std::vector<Course *> choices;
                 for (std::string &choiceName : choiceNames) {
                     choiceName = trimWhitespace(choiceName);
                     if (isID(choiceName)) {
@@ -137,7 +135,7 @@ void loadFile(const std::string &pathPrefix,
                 curCourse->addChoice(choices);
             } else if (isPathway) {
                 std::vector<std::string> pathwayNames = split(component, ',');
-                std::vector<const Course *> pathways;
+                std::vector<Course *> pathways;
                 for (std::string &pathwayName : pathwayNames) {
                     pathwayName = trimWhitespace(pathwayName);
                     if (isID(pathwayName)) {
