@@ -10,8 +10,6 @@ void printHelpMessage() {
         {"exit", "Exits the program"},
         {"", ""},
         {"list", "Shows list of courses that have already been taken"},
-
-        {"add [course]", "Adds course to the courses database"},
         {"take [course]", "Adds course to the list of taken courses"},
         {"info [course]", "Shows information about a given course"},
         {"prereq [course]", "Lists all prereqs needed to take a given course"},
@@ -27,7 +25,7 @@ void printHelpMessage() {
 }
 
 void printAvailableCourses(
-    const std::unordered_map<std::string, Course *> &courseMap, User &user,
+    const std::unordered_map<std::string, Course *> &courseMap, User *user,
     const std::string &dept) {
     std::vector<const Course *> availableCourses;
 
@@ -36,7 +34,7 @@ void printAvailableCourses(
             continue;
         }
 
-        if (!user.hasTaken(course) && user.hasAllPrereqs(course)) {
+        if (!user->hasTaken(course) && user->hasAllPrereqs(course)) {
             availableCourses.push_back(course);
         }
     }
@@ -105,12 +103,10 @@ void loadFile(const std::string &pathPrefix,
         if (!component.empty()) {
             components.emplace_back(component);
         }
-        // Find whether each component is:
-        // * A standalone course name
-        // * A choice (choose one course from the list)
-        // * A pathway (choose one sublist from a list of lists)
-        // Then add it to the current Course using the corresponding method
+        // Process each comma-separated "component" of the input string
         for (std::string &component : components) {
+            // Determine whether the current component is a part of a choice,
+            // pathway, or neither
             bool isChoice = false, isPathway = false;
             for (const char &c : component) {
                 if (c == '|') {
@@ -123,6 +119,7 @@ void loadFile(const std::string &pathPrefix,
                 }
             }
             if (isChoice) {
+                // Handle choice case
                 std::vector<std::string> choiceNames = split(component, '|');
                 std::vector<Course *> choices;
                 for (std::string &choiceName : choiceNames) {
@@ -134,6 +131,7 @@ void loadFile(const std::string &pathPrefix,
                 }
                 curCourse->addChoice(choices);
             } else if (isPathway) {
+                // Handle pathway case
                 std::vector<std::string> pathwayNames = split(component, '|');
                 std::vector<std::vector<Course *>> allPathways;
                 for (std::string &pathwayName : pathwayNames) {
@@ -152,6 +150,8 @@ void loadFile(const std::string &pathPrefix,
                 }
                 curCourse->addPathway(allPathways);
             } else {
+                // If neither of the above cases, just treat the component as a
+                // Course name and add it to courseMap
                 component = trimWhitespace(component);
                 if (isID(component)) {
                     component = dept + ' ' + component;
@@ -173,6 +173,8 @@ int main() {
         HELP,
         INFO,
         LIST,
+        LOGIN,
+        LOGOUT,
         PREREQ,
         REMOVE,
         TAKE,
@@ -180,9 +182,10 @@ int main() {
     };
     // Input table that will validate inputs from the user, returns input codes
     const std::unordered_map<std::string, int> validInputs = {
-        {"available", AVAILABLE}, {"exit", EXIT}, {"help", HELP},
-        {"info", INFO},           {"list", LIST}, {"prereq", PREREQ},
-        {"remove", REMOVE},       {"take", TAKE}, {"update", UPDATE},
+        {"available", AVAILABLE}, {"exit", EXIT},     {"help", HELP},
+        {"info", INFO},           {"list", LIST},     {"login", LOGIN},
+        {"logout", LOGOUT},       {"prereq", PREREQ}, {"remove", REMOVE},
+        {"take", TAKE},           {"update", UPDATE},
     };
     // Load in prerequisite info from local text files
     std::unordered_map<std::string, Course *> courseMap;
@@ -199,11 +202,11 @@ int main() {
             departments.insert(dept);
         }
     }
-    // Load in the user info
-    User user(courseMap, "user.txt");
+    // Initialize user (anonymous)
+    User *user = new User();
     std::string input;
     while (getline(std::cin, input)) {
-        const auto [cmd, args] = parseInput(input);
+        auto [cmd, args] = parseInput(input);
         // Check if the input command is valid or not
         if (validInputs.find(cmd) == validInputs.end()) {
             std::cout << "Invalid input. Type `help' for a list of commands."
@@ -213,7 +216,6 @@ int main() {
         // Handle valid commands
         switch (validInputs.at(cmd)) {
             case AVAILABLE:
-                // TODO: Add code to list all available classes based on DAG
                 if (!args.empty() &&
                     departments.find(args[0]) != departments.end()) {
                     printAvailableCourses(courseMap, user, args[0]);
@@ -223,6 +225,10 @@ int main() {
                 }
                 break;
             case EXIT:
+                for (auto &[name, course] : courseMap) {
+                    delete (course);
+                }
+                delete (user);
                 return 0;
             case HELP:
                 printHelpMessage();
@@ -237,7 +243,18 @@ int main() {
                 }
                 break;
             case LIST:
-                user.printTakenCourses();
+                user->printTakenCourses();
+                break;
+            case LOGIN:
+                // Format the user-passed argument into a valid path
+                replace(args[0].begin(), args[0].end(), ' ', '_');
+                args[0] += ".txt";
+                delete (user);
+                user = new User(courseMap, args[0]);
+                break;
+            case LOGOUT:
+                delete (user);
+                user = new User();
                 break;
             case PREREQ:
                 if (!args.empty() &&
@@ -249,10 +266,10 @@ int main() {
                 }
                 break;
             case TAKE:
-                user.addCourses(courseMap, args);
+                user->addCourses(courseMap, args);
                 break;
             case REMOVE:
-                user.removeCourses(courseMap, args);
+                user->removeCourses(courseMap, args);
                 break;
             case UPDATE:
                 std::ignore =

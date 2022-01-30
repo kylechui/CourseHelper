@@ -15,23 +15,23 @@ Course::Course(const std::string &name) {
     m_description = "No description provided.";
 }
 
-Course::~Course() {
-    for (Course *c : m_prereqs) {
-        delete (c);
-    }
-    for (std::vector<Course *> &choice : m_choices) {
-        for (Course *c : choice) {
-            delete (c);
-        }
-    }
-    for (std::vector<std::vector<Course *>> &pathway : m_pathways) {
-        for (std::vector<Course *> &choice : pathway) {
-            for (Course *c : choice) {
-                delete (c);
-            }
-        }
-    }
-}
+// Course::~Course() {
+//     for (Course *c : m_prereqs) {
+//         delete (c);
+//     }
+//     for (std::vector<Course *> &choice : m_choices) {
+//         for (Course *c : choice) {
+//             delete (c);
+//         }
+//     }
+//     for (std::vector<std::vector<Course *>> &pathway : m_pathways) {
+//         for (std::vector<Course *> &choice : pathway) {
+//             for (Course *c : choice) {
+//                 delete (c);
+//             }
+//         }
+//     }
+// }
 
 std::string Course::getName() const { return m_department + ' ' + m_ID; }
 
@@ -89,13 +89,14 @@ void Course::addPathway(std::vector<std::vector<Course *>> &pathway) {
     m_pathways.push_back(pathway);
 }
 
-// TODO: Format the printing to be at *most* n characters wide
-void Course::printInfo(User &user) {
+// TODO: Format the printing to be at *most* n characters wide, maybe write own
+// function in utils to handle print formatting and line wrapping
+void Course::printInfo(User *user) {
     std::cout << getName() << std::endl << std::endl;
     std::cout << m_description << std::endl << std::endl;
-    if (user.hasTaken(this)) {
+    if (user->hasTaken(this)) {
         std::cout << "You have already taken this class." << std::endl;
-    } else if (user.hasAllPrereqs(this)) {
+    } else if (user->hasAllPrereqs(this)) {
         std::cout << "You can take this class next quarter!" << std::endl;
     } else {
         if (m_prereqs.size() == 0 && m_choices.size() == 0 &&
@@ -107,7 +108,7 @@ void Course::printInfo(User &user) {
             std::cout << "You still need to take all of the following courses:"
                       << std::endl;
             for (Course *prereq : m_prereqs) {
-                if (!user.hasTaken(prereq)) {
+                if (!user->hasTaken(prereq)) {
                     std::cout << "* " << prereq->getName() << std::endl;
                 }
             }
@@ -117,11 +118,11 @@ void Course::printInfo(User &user) {
                          "following rows:"
                       << std::endl;
             for (const std::vector<Course *> &choice : m_choices) {
-                std::vector<std::string> choiceNames;
-                for (Course *course : choice) {
-                    choiceNames.emplace_back(course->getName());
-                }
-                std::cout << "* " << join(choiceNames, ", ") << std::endl;
+                // std::vector<std::string> choiceNames;
+                // for (Course *course : choice) {
+                //     choiceNames.emplace_back(course->getName());
+                // }
+                std::cout << "* " << joinNames(choice, ", ") << std::endl;
             }
         }
         if (m_pathways.size() != 0) {
@@ -132,11 +133,11 @@ void Course::printInfo(User &user) {
                        "following rows:"
                     << std::endl;
                 for (const std::vector<Course *> &pathway : pathways) {
-                    std::vector<std::string> pathwayNames;
-                    for (Course *course : pathway) {
-                        pathwayNames.emplace_back(course->getName());
-                    }
-                    std::cout << "* " << join(pathwayNames, ", ") << std::endl;
+                    // std::vector<std::string> pathwayNames;
+                    // for (Course *course : pathway) {
+                    //     pathwayNames.emplace_back(course->getName());
+                    // }
+                    std::cout << "* " << joinNames(pathway, ", ") << std::endl;
                 }
             }
         }

@@ -6,6 +6,7 @@ class Course;
 
 class User {
    public:
+    User();
     User(const std::unordered_map<std::string, Course*>& courseMap,
          const std::string& file);
     std::set<Course*> getTakenCourses() const;

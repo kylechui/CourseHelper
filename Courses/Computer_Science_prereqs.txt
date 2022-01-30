@@ -34,8 +34,8 @@ C137A
 M51A | Electrical and Computer Engineering M16
 M151B | Electrical Engineering M116C
 180
-32 | Program in Computing 10C, 33A, Civil and Environmental Engineering 110 | Electrical and Computer Engineering 131A | Mathematics 170A | Mathematics 170E | Statistics 100A
-180, 33B
+32 | Program in Computing 10C, Mathematics 33A, Civil and Environmental Engineering 110 | Electrical and Computer Engineering 131A | Mathematics 170A | Mathematics 170E | Statistics 100A
+180, Mathematics 33B
 
 32
 32

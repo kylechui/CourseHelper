@@ -7,7 +7,7 @@ class User;
 class Course {
    public:
     Course(const std::string &filename);
-    ~Course();
+    // ~Course();
     std::string getName() const;
     std::string getDescription() const;
     std::vector<Course *> getPrereqs() const;
@@ -20,7 +20,7 @@ class Course {
     void addPrereq(Course *prereq);
     void addChoice(std::vector<Course *> &choice);
     void addPathway(std::vector<std::vector<Course *>> &pathway);
-    void printInfo(User &user);
+    void printInfo(User *user);
     void printPrereqs();
 
    private:
