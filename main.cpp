@@ -248,7 +248,7 @@ int main() {
             case LOGIN:
                 // Format the user-passed argument into a valid path
                 replace(args[0].begin(), args[0].end(), ' ', '_');
-                args[0] += ".txt";
+                args[0] = "./Users/" + args[0] + ".txt";
                 delete (user);
                 user = new User(courseMap, args[0]);
                 break;
