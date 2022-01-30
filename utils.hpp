@@ -10,7 +10,7 @@ std::string join(const std::vector<std::string>& components,
                  const std::string& delimiter);
 std::string joinNames(const std::vector<Course*>& courses,
                       const std::string& delimiter);
-bool isPrefix(const std::string& src, const std::string& prefix);
+std::string formatName(const std::string& name, const std::string& dept);
 bool isID(const std::string& src);
 std::pair<std::string, std::vector<std::string>> parseInput(
     const std::string& src);

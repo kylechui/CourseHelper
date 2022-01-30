@@ -71,22 +71,12 @@ std::string joinNames(const std::vector<Course*>& courses,
     return result;
 }
 
-/**
- * Returns whether the given string is a prefix of another string.
- * @param src the source string.
- * @param prefix the potential prefix of src.
- * @return whether prefix is a prefix of src.
- */
-bool isPrefix(const std::string& src, const std::string& prefix) {
-    if (prefix.size() > src.size()) {
-        return false;
+std::string formatName(const std::string& name, const std::string& dept) {
+    std::string formatted = trimWhitespace(name);
+    if (isID(formatted)) {
+        return dept + ' ' + formatted;
     }
-    for (size_t i = 0; i < prefix.size(); i++) {
-        if (prefix[i] != src[i]) {
-            return false;
-        }
-    }
-    return true;
+    return formatted;
 }
 
 /**

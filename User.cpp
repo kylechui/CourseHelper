@@ -6,9 +6,6 @@
 
 User::User() {}
 
-// TODO: replace this "overwriting" with a destructor + pointer in main
-// TODO: Make m_name, m_file const again, reserve empty string for anon user
-
 User::User(const std::unordered_map<std::string, Course *> &courseMap,
            const std::string &file)
     : m_file(file) {
@@ -61,7 +58,7 @@ void User::printTakenCourses() const {
         std::cout << "You are not logged in. Log in or create a new profile "
                      "via `login [username]'."
                   << std::endl;
-    } else if (m_takenCourses.size() == 0) {
+    } else if (m_takenCourses.empty()) {
         std::cout << "You have not taken any courses yet." << std::endl;
     } else {
         std::cout << "You have taken:" << std::endl;

@@ -8,8 +8,10 @@ class Course {
    public:
     Course(const std::string &filename);
     // ~Course();
-    std::string getName() const;
+    std::string getID() const;
+    std::string getDepartment() const;
     std::string getDescription() const;
+    std::string getName() const;
     std::vector<Course *> getPrereqs() const;
     std::vector<std::vector<Course *>> getChoices() const;
     std::vector<std::vector<std::vector<Course *>>> getPathways() const;
@@ -24,8 +26,8 @@ class Course {
     void printPrereqs();
 
    private:
-    std::string m_department;
     std::string m_ID;
+    std::string m_department;
     std::string m_description;
     std::vector<Course *> m_prereqs;
     std::vector<std::vector<Course *>> m_choices;

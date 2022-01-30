@@ -1,8 +1,17 @@
 #include <bits/stdc++.h>
 
+#include <algorithm>
+
 #include "Course.hpp"
 #include "User.hpp"
 #include "utils.hpp"
+
+void cleanup(std::unordered_map<std::string, Course *> &courseMap, User *user) {
+    delete (user);
+    for (auto &[name, course] : courseMap) {
+        delete (course);
+    }
+}
 
 void printHelpMessage() {
     const std::vector<std::pair<std::string, std::string>> helpMessage = {
@@ -30,7 +39,7 @@ void printAvailableCourses(
     std::vector<const Course *> availableCourses;
 
     for (const auto &[name, course] : courseMap) {
-        if (!isPrefix(name, dept)) {
+        if (course->getDepartment() != dept) {
             continue;
         }
 
@@ -123,11 +132,8 @@ void loadFile(const std::string &pathPrefix,
                 std::vector<std::string> choiceNames = split(component, '|');
                 std::vector<Course *> choices;
                 for (std::string &choiceName : choiceNames) {
-                    choiceName = trimWhitespace(choiceName);
-                    if (isID(choiceName)) {
-                        choiceName = dept + ' ' + choiceName;
-                    }
-                    choices.emplace_back(getCourse(courseMap, choiceName));
+                    choices.emplace_back(
+                        getCourse(courseMap, formatName(choiceName, dept)));
                 }
                 curCourse->addChoice(choices);
             } else if (isPathway) {
@@ -139,12 +145,8 @@ void loadFile(const std::string &pathPrefix,
                     std::vector<std::string> pathwayComponent =
                         split(pathwayName, ',');
                     for (std::string &tmp : pathwayComponent) {
-                        tmp = trimWhitespace(tmp);
-                        if (isID(tmp)) {
-                            tmp = dept + ' ' + tmp;
-                        }
                         pathways.emplace_back(
-                            getCourse(courseMap, trimWhitespace(tmp)));
+                            getCourse(courseMap, formatName(tmp, dept)));
                     }
                     allPathways.emplace_back(pathways);
                 }
@@ -152,11 +154,8 @@ void loadFile(const std::string &pathPrefix,
             } else {
                 // If neither of the above cases, just treat the component as a
                 // Course name and add it to courseMap
-                component = trimWhitespace(component);
-                if (isID(component)) {
-                    component = dept + ' ' + component;
-                }
-                curCourse->addPrereq(getCourse(courseMap, component));
+                curCourse->addPrereq(
+                    getCourse(courseMap, formatName(component, dept)));
             }
         }
     }
@@ -215,7 +214,7 @@ int main() {
         }
         // Handle valid commands
         switch (validInputs.at(cmd)) {
-            case AVAILABLE:
+            case AVAILABLE: {
                 if (!args.empty() &&
                     departments.find(args[0]) != departments.end()) {
                     printAvailableCourses(courseMap, user, args[0]);
@@ -224,16 +223,16 @@ int main() {
                               << std::endl;
                 }
                 break;
-            case EXIT:
-                for (auto &[name, course] : courseMap) {
-                    delete (course);
-                }
-                delete (user);
+            }
+            case EXIT: {
+                cleanup(courseMap, user);
                 return 0;
-            case HELP:
+            }
+            case HELP: {
                 printHelpMessage();
                 break;
-            case INFO:
+            }
+            case INFO: {
                 if (!args.empty() &&
                     courseMap.find(args[0]) != courseMap.end()) {
                     courseMap[args[0]]->printInfo(user);
@@ -242,21 +241,42 @@ int main() {
                               << std::endl;
                 }
                 break;
-            case LIST:
+            }
+            case LIST: {
                 user->printTakenCourses();
                 break;
-            case LOGIN:
+            }
+            case LOGIN: {
+                std::string username(args[0]);
+                if (username.empty()) {
+                    std::cout << "No username detected. Please try again."
+                              << std::endl;
+                }
                 // Format the user-passed argument into a valid path
-                replace(args[0].begin(), args[0].end(), ' ', '_');
-                args[0] = "./Users/" + args[0] + ".txt";
+                std::replace(args[0].begin(), args[0].end(), ' ', '_');
+                std::string userString = "./Users/" + args[0] + ".txt";
+                std::filesystem::path userPath(userString);
+                if (!std::filesystem::exists(userPath)) {
+                    std::cout << "User `" + username +
+                                     "' not found. Would you like to create a "
+                                     "new profile? [Y/n] "
+                              << std::endl;
+                    std::string response;
+                    getline(std::cin, response);
+                    if (tolower(response[0]) != 'y') {
+                        break;
+                    }
+                }
                 delete (user);
-                user = new User(courseMap, args[0]);
+                user = new User(courseMap, userPath);
                 break;
-            case LOGOUT:
+            }
+            case LOGOUT: {
                 delete (user);
                 user = new User();
                 break;
-            case PREREQ:
+            }
+            case PREREQ: {
                 if (!args.empty() &&
                     courseMap.find(args[0]) != courseMap.end()) {
                     courseMap[args[0]]->printPrereqs();
@@ -265,16 +285,21 @@ int main() {
                               << std::endl;
                 }
                 break;
-            case TAKE:
+            }
+            case TAKE: {
                 user->addCourses(courseMap, args);
                 break;
-            case REMOVE:
+            }
+            case REMOVE: {
                 user->removeCourses(courseMap, args);
                 break;
-            case UPDATE:
+            }
+            case UPDATE: {
                 std::ignore =
                     std::system(("python3 ./scraper.py " + args[0]).c_str());
                 break;
+            }
         }
     }
+    cleanup(courseMap, user);
 }

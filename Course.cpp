@@ -15,27 +15,11 @@ Course::Course(const std::string &name) {
     m_description = "No description provided.";
 }
 
-// Course::~Course() {
-//     for (Course *c : m_prereqs) {
-//         delete (c);
-//     }
-//     for (std::vector<Course *> &choice : m_choices) {
-//         for (Course *c : choice) {
-//             delete (c);
-//         }
-//     }
-//     for (std::vector<std::vector<Course *>> &pathway : m_pathways) {
-//         for (std::vector<Course *> &choice : pathway) {
-//             for (Course *c : choice) {
-//                 delete (c);
-//             }
-//         }
-//     }
-// }
-
-std::string Course::getName() const { return m_department + ' ' + m_ID; }
+std::string Course::getDepartment() const { return m_department; }
 
 std::string Course::getDescription() const { return m_description; }
+
+std::string Course::getName() const { return m_department + ' ' + m_ID; }
 
 std::vector<Course *> Course::getPrereqs() const { return m_prereqs; }
 
@@ -99,12 +83,11 @@ void Course::printInfo(User *user) {
     } else if (user->hasAllPrereqs(this)) {
         std::cout << "You can take this class next quarter!" << std::endl;
     } else {
-        if (m_prereqs.size() == 0 && m_choices.size() == 0 &&
-            m_pathways.size() == 0) {
+        if (m_prereqs.empty() && m_choices.empty() && m_pathways.empty()) {
             std::cout << "There are no requirements for this class."
                       << std::endl;
         }
-        if (m_prereqs.size() != 0) {
+        if (!m_prereqs.empty()) {
             std::cout << "You still need to take all of the following courses:"
                       << std::endl;
             for (Course *prereq : m_prereqs) {
@@ -113,7 +96,7 @@ void Course::printInfo(User *user) {
                 }
             }
         }
-        if (m_choices.size() != 0) {
+        if (!m_choices.empty()) {
             std::cout << "You must choose at least one class from each of the "
                          "following rows:"
                       << std::endl;
@@ -125,7 +108,7 @@ void Course::printInfo(User *user) {
                 std::cout << "* " << joinNames(choice, ", ") << std::endl;
             }
         }
-        if (m_pathways.size() != 0) {
+        if (!m_pathways.empty()) {
             for (const std::vector<std::vector<Course *>> &pathways :
                  m_pathways) {
                 std::cout
@@ -147,18 +130,17 @@ void Course::printInfo(User *user) {
 
 void Course::printPrereqs() {
     auto [required, choices, allPathways] = this->getAllPrereqs();
-    if (required.size() == 0 && choices.size() == 0 &&
-        allPathways.size() == 0) {
+    if (required.empty() && choices.empty() && allPathways.empty()) {
         std::cout << "There are no requirements to take this class."
                   << std::endl;
     } else {
-        if (required.size() != 0) {
+        if (!required.empty()) {
             std::cout << "You need the following:" << std::endl;
             for (Course *course : required) {
                 std::cout << "* " << course->getName() << std::endl;
             }
         }
-        if (choices.size() != 0) {
+        if (!choices.empty()) {
             std::cout << "You need to take at least one class from each of "
                          "the following rows:"
                       << std::endl;
@@ -166,7 +148,7 @@ void Course::printPrereqs() {
                 std::cout << "* " << joinNames(choice, ", ") << std::endl;
             }
         }
-        if (allPathways.size() != 0) {
+        if (!allPathways.empty()) {
             for (std::vector<std::vector<Course *>> &pathways : allPathways) {
                 std::cout
                     << "You need to take all the classes from at least one "
