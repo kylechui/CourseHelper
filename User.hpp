@@ -17,7 +17,10 @@ class User {
         const std::vector<std::string>& courseNames);
     void printTakenCourses() const;
     bool hasTaken(Course* course);
-    bool hasAllPrereqs(Course* course);
+    // bool hasAllPrereqs(Course* course);
+    std::tuple<std::vector<Course*>, std::vector<std::vector<Course*>>,
+               std::vector<std::vector<std::vector<Course*>>>>
+    getRemainingPrereqs(Course* course);
 
    private:
     std::set<Course*> m_takenCourses;

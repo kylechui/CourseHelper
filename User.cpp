@@ -72,7 +72,59 @@ bool User::hasTaken(Course *course) {
     return m_takenCourses.find(course) != m_takenCourses.end();
 }
 
-bool User::hasAllPrereqs(Course *course) {
+std::tuple<std::vector<Course *>, std::vector<std::vector<Course *>>,
+           std::vector<std::vector<std::vector<Course *>>>>
+User::getRemainingPrereqs(Course *course) {
+    auto [required, choices, allPathways] = course->getAllPrereqs();
+    for (Course *taken : m_takenCourses) {
+        for (Course *&req : required) {
+            // Remove the class if it's been found
+            if (taken == req) {
+                std::swap(req, required.back());
+                required.pop_back();
+                break;
+            }
+        }
+        for (std::vector<Course *> &choice : choices) {
+            bool found = false;
+            for (Course *&option : choice) {
+                if (taken == option) {
+                    found = true;
+                    break;
+                }
+            }
+            // If the class is one of the choices, remove that choice (since it
+            // has been satisfied)
+            if (found) {
+                std::swap(choice, choices.back());
+                choices.pop_back();
+                break;
+            }
+        }
+        for (std::vector<std::vector<Course *>> &pathways : allPathways) {
+            for (std::vector<Course *> &pathway : pathways) {
+                for (Course *&option : pathway) {
+                    if (taken == option) {
+                        std::swap(option, pathway.back());
+                        pathway.pop_back();
+                        break;
+                    }
+                }
+                if (pathway.empty()) {
+                    swap(pathway, pathways.back());
+                    pathways.pop_back();
+                }
+            }
+            if (pathways.empty()) {
+                swap(pathways, allPathways.back());
+                allPathways.pop_back();
+            }
+        }
+    }
+    return {required, choices, allPathways};
+}
+
+/* bool User::hasAllPrereqs(Course *course) {
     auto [required, choices, allPathways] = course->getAllPrereqs();
     for (Course *prereq : required) {
         if (m_takenCourses.find(prereq) == m_takenCourses.end()) {
@@ -111,4 +163,4 @@ bool User::hasAllPrereqs(Course *course) {
         }
     }
     return true;
-}
+} */

@@ -78,48 +78,35 @@ void Course::addPathway(std::vector<std::vector<Course *>> &pathway) {
 void Course::printInfo(User *user) {
     std::cout << getName() << std::endl << std::endl;
     std::cout << m_description << std::endl << std::endl;
+    auto [required, choices, allPathways] = user->getRemainingPrereqs(this);
     if (user->hasTaken(this)) {
         std::cout << "You have already taken this class." << std::endl;
-    } else if (user->hasAllPrereqs(this)) {
+    } else if (required.empty() && choices.empty() && allPathways.empty()) {
         std::cout << "You can take this class next quarter!" << std::endl;
     } else {
-        if (m_prereqs.empty() && m_choices.empty() && m_pathways.empty()) {
-            std::cout << "There are no requirements for this class."
-                      << std::endl;
-        }
-        if (!m_prereqs.empty()) {
+        if (!required.empty()) {
             std::cout << "You still need to take all of the following courses:"
                       << std::endl;
-            for (Course *prereq : m_prereqs) {
-                if (!user->hasTaken(prereq)) {
-                    std::cout << "* " << prereq->getName() << std::endl;
-                }
+            for (Course *prereq : required) {
+                std::cout << "* " << prereq->getName() << std::endl;
             }
         }
-        if (!m_choices.empty()) {
+        if (!choices.empty()) {
             std::cout << "You must choose at least one class from each of the "
                          "following rows:"
                       << std::endl;
-            for (const std::vector<Course *> &choice : m_choices) {
-                // std::vector<std::string> choiceNames;
-                // for (Course *course : choice) {
-                //     choiceNames.emplace_back(course->getName());
-                // }
+            for (const std::vector<Course *> &choice : choices) {
                 std::cout << "* " << joinNames(choice, ", ") << std::endl;
             }
         }
-        if (!m_pathways.empty()) {
+        if (!allPathways.empty()) {
             for (const std::vector<std::vector<Course *>> &pathways :
-                 m_pathways) {
+                 allPathways) {
                 std::cout
                     << "You must choose all classes from at least one of the "
                        "following rows:"
                     << std::endl;
                 for (const std::vector<Course *> &pathway : pathways) {
-                    // std::vector<std::string> pathwayNames;
-                    // for (Course *course : pathway) {
-                    //     pathwayNames.emplace_back(course->getName());
-                    // }
                     std::cout << "* " << joinNames(pathway, ", ") << std::endl;
                 }
             }

@@ -39,11 +39,14 @@ void printAvailableCourses(
     std::vector<const Course *> availableCourses;
 
     for (const auto &[name, course] : courseMap) {
+        auto [required, choices, allPathways] =
+            user->getRemainingPrereqs(course);
         if (course->getDepartment() != dept) {
             continue;
         }
 
-        if (!user->hasTaken(course) && user->hasAllPrereqs(course)) {
+        if (!user->hasTaken(course) && required.empty() && choices.empty() &&
+            allPathways.empty()) {
             availableCourses.push_back(course);
         }
     }
