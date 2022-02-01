@@ -1,17 +1,18 @@
-Computer Science 31
-Computer Science 32
-Computer Science 33
-Computer Science 35L
-Mathematics 106
-Mathematics 115AH
-Mathematics 131A
-Mathematics 134
-Mathematics 151A
-Mathematics 170E
+Math Diagnostic Test
 Mathematics 31A
 Mathematics 31B
 Mathematics 32A
 Mathematics 32B
 Mathematics 33A
 Mathematics 33B
+Computer Science 31
 Mathematics 61
+Mathematics 131A
+Mathematics 106
+Mathematics 115AH
+Mathematics 134
+Mathematics 151A
+Mathematics 170E
+Computer Science 32
+Computer Science 33
+Computer Science 35L

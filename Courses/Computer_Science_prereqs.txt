@@ -27,7 +27,6 @@ C137A
 32 | Program in Computing 10C
 143
 143
-33, Civil and Environmental Engineering 110 | Electrical and Computer Engineering 131A | Mathematics 170A | Mathematics 170E | Statistics 100A
 32 | Program in Computing 10C, Civil and Environmental Engineering 110 | Electrical and Computer Engineering 131A | Mathematics 170A | Mathematics 170E | Statistics 100A
 31 | (Program in Computing 10A, Program in Computing 10B), Civil and Environmental Engineering 110 | Electrical and Computer Engineering 131A | Mathematics 170A | Mathematics 170E | Statistics 100A
 33, M51A | Electrical and Computer Engineering M16
