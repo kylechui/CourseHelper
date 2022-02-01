@@ -44,6 +44,19 @@ std::vector<std::string> split(const std::string& src, const char& delimiter) {
 }
 
 /**
+ * Converts source string to lowercase and returns the result.
+ * @param src the input string.
+ * @return result the source string converted to lowercase.
+ */
+std::string tolower(const std::string& src) {
+    std::string result(src);
+    for (char& c : result) {
+        c = tolower(c);
+    }
+    return result;
+}
+
+/**
  * Returns a string of components joined together by a delimiting string.
  * @param components a list of split components to be joined together.
  * @param delimiter the delimiter to be inserted between components.
@@ -103,10 +116,11 @@ std::pair<std::string, std::vector<std::string>> parseInput(
     const std::string& src) {
     int spaceIndex =
         src.find(' ') == std::string::npos ? src.size() : src.find(' ');
-    std::string cmd = src.substr(0, spaceIndex);
+    std::string cmd = tolower(src.substr(0, spaceIndex));
     std::vector<std::string> args = split(src.substr(spaceIndex), ',');
     for (std::string& arg : args) {
         arg = trimWhitespace(arg);
+        arg = tolower(arg);
     }
     return {cmd, args};
 }

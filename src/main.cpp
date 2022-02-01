@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 
 #include <algorithm>
+#include <cctype>
 
 #include "Course.hpp"
 #include "User.hpp"
@@ -39,14 +40,14 @@ void printAvailableCourses(
     std::vector<const Course *> availableCourses;
 
     for (const auto &[name, course] : courseMap) {
-        auto [required, choices, allPathways] =
+        auto [requiredReqs, choiceReqs, seriesReqs] =
             user->getRemainingPrereqs(course);
         if (course->getDepartment() != dept) {
             continue;
         }
 
-        if (!user->hasTaken(course) && required.empty() && choices.empty() &&
-            allPathways.empty()) {
+        if (!user->hasTaken(course) && requiredReqs.empty() &&
+            choiceReqs.empty() && seriesReqs.empty()) {
             availableCourses.push_back(course);
         }
     }
@@ -68,10 +69,11 @@ void printAvailableCourses(
  */
 Course *getCourse(std::unordered_map<std::string, Course *> &courseMap,
                   const std::string &name) {
-    if (courseMap.find(name) == courseMap.end()) {
-        courseMap[name] = new Course(name);
+    std::string lowercaseName = tolower(name);
+    if (courseMap.find(lowercaseName) == courseMap.end()) {
+        courseMap[lowercaseName] = new Course(name);
     }
-    return courseMap[name];
+    return courseMap[lowercaseName];
 }
 
 void loadFile(const std::string &pathPrefix,
@@ -81,18 +83,17 @@ void loadFile(const std::string &pathPrefix,
     std::string dept(pathPrefix.begin() + prefix.size(), pathPrefix.end());
     replace(dept.begin(), dept.end(), '_', ' ');
     // Read in all input files simultaneously for the given department
-    std::ifstream IDs(pathPrefix + "_IDs.txt", std::ifstream::in);
-    std::ifstream descriptions(pathPrefix + "_descriptions.txt",
-                               std::ifstream::in);
-    std::ifstream prereqs(pathPrefix + "_prereqs.txt", std::ifstream::in);
-    std::string ID, prereq, desc;
-    while (getline(IDs, ID) && getline(prereqs, prereq) &&
-           getline(descriptions, desc)) {
-        std::string name = dept + ' ' + ID;
+    std::ifstream IDFile(pathPrefix + "_IDs.txt", std::ifstream::in);
+    std::ifstream descFile(pathPrefix + "_descriptions.txt", std::ifstream::in);
+    std::ifstream prereqFile(pathPrefix + "_prereqs.txt", std::ifstream::in);
+    std::string IDLine, prereqLine, descLine;
+    while (getline(IDFile, IDLine) && getline(prereqFile, prereqLine) &&
+           getline(descFile, descLine)) {
+        std::string name = dept + ' ' + IDLine;
         Course *curCourse = getCourse(courseMap, name);
-        curCourse->setDescription(desc);
+        curCourse->setDescription(descLine);
         // If there are no prereqs, go to the next Course
-        if (prereq.empty()) {
+        if (prereqLine.empty()) {
             continue;
         }
         // Parse prereq and add the corresponding prereqs to the current Course
@@ -100,7 +101,7 @@ void loadFile(const std::string &pathPrefix,
         std::vector<std::string> components;
         std::string component;
         int depth = 0;
-        for (const char &c : prereq) {
+        for (const char &c : prereqLine) {
             if (c == ',' && depth == 0) {
                 components.emplace_back(component);
                 component.clear();
@@ -118,15 +119,15 @@ void loadFile(const std::string &pathPrefix,
         // Process each comma-separated "component" of the input string
         for (std::string &component : components) {
             // Determine whether the current component is a part of a choice,
-            // pathway, or neither
-            bool isChoice = false, isPathway = false;
+            // series, or neither
+            bool isChoice = false, isSeries = false;
             for (const char &c : component) {
                 if (c == '|') {
                     isChoice = true;
                     break;
                 }
                 if (c == ',') {
-                    isPathway = true;
+                    isSeries = true;
                     break;
                 }
             }
@@ -138,33 +139,33 @@ void loadFile(const std::string &pathPrefix,
                     choices.emplace_back(
                         getCourse(courseMap, formatName(choiceName, dept)));
                 }
-                curCourse->addChoice(choices);
-            } else if (isPathway) {
-                // Handle pathway case
-                std::vector<std::string> pathwayNames = split(component, '|');
-                std::vector<std::vector<Course *>> allPathways;
-                for (std::string &pathwayName : pathwayNames) {
-                    std::vector<Course *> pathways;
-                    std::vector<std::string> pathwayComponent =
-                        split(pathwayName, ',');
-                    for (std::string &tmp : pathwayComponent) {
-                        pathways.emplace_back(
+                curCourse->addChoiceReq(choices);
+            } else if (isSeries) {
+                // Handle series case
+                std::vector<std::string> seriesNames = split(component, '|');
+                std::vector<std::vector<Course *>> seriesReq;
+                for (std::string &seriesName : seriesNames) {
+                    std::vector<Course *> series;
+                    std::vector<std::string> seriesComponent =
+                        split(seriesName, ',');
+                    for (std::string &tmp : seriesComponent) {
+                        series.emplace_back(
                             getCourse(courseMap, formatName(tmp, dept)));
                     }
-                    allPathways.emplace_back(pathways);
+                    seriesReq.emplace_back(series);
                 }
-                curCourse->addPathway(allPathways);
+                curCourse->addSeriesReq(seriesReq);
             } else {
                 // If neither of the above cases, just treat the component as a
                 // Course name and add it to courseMap
-                curCourse->addPrereq(
+                curCourse->addRequiredReq(
                     getCourse(courseMap, formatName(component, dept)));
             }
         }
     }
-    IDs.close();
-    prereqs.close();
-    descriptions.close();
+    IDFile.close();
+    prereqFile.close();
+    descFile.close();
 }
 
 int main() {
@@ -191,7 +192,7 @@ int main() {
     };
     // Load in prerequisite info from local text files
     std::unordered_map<std::string, Course *> courseMap;
-    std::unordered_set<std::string> departments;
+    std::vector<std::string> departments;
     for (auto &entry : std::filesystem::directory_iterator("./Courses")) {
         std::string filename = std::string(entry.path());
         const std::string prefix = "./Courses/", suffix = "_prereqs.txt";
@@ -201,7 +202,7 @@ int main() {
             std::string dept =
                 filename.substr(psz, filename.size() - psz - ssz);
             replace(dept.begin(), dept.end(), '_', ' ');
-            departments.insert(dept);
+            departments.push_back(dept);
         }
     }
     // Initialize user (anonymous)
@@ -218,10 +219,15 @@ int main() {
         // Handle valid commands
         switch (validInputs.at(cmd)) {
             case AVAILABLE: {
-                if (!args.empty() &&
-                    departments.find(args[0]) != departments.end()) {
-                    printAvailableCourses(courseMap, user, args[0]);
-                } else {
+                bool found = false;
+                for (const std::string &department : departments) {
+                    if (args[0] == tolower(department)) {
+                        printAvailableCourses(courseMap, user, department);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
                     std::cout << "Department not found. Please try again."
                               << std::endl;
                 }
@@ -300,6 +306,12 @@ int main() {
             case UPDATE: {
                 std::ignore =
                     std::system(("python3 ./scraper.py " + args[0]).c_str());
+                break;
+            }
+            default: {
+                std::cout << "Invalid command. Type `help' to get a list "
+                             "of commands."
+                          << std::endl;
                 break;
             }
         }

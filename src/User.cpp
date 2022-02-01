@@ -3,6 +3,7 @@
 #include <bits/stdc++.h>
 
 #include "Course.hpp"
+#include "utils.hpp"
 
 User::User() {}
 
@@ -12,7 +13,7 @@ User::User(const std::unordered_map<std::string, Course *> &courseMap,
     std::ifstream userInfo(m_file, std::ifstream::in);
     std::string name;
     while (getline(userInfo, name)) {
-        m_takenCourses.insert(courseMap.at(name));
+        m_takenCourses.insert(courseMap.at(tolower(name)));
     }
     userInfo.close();
 }
@@ -75,17 +76,17 @@ bool User::hasTaken(Course *course) {
 std::tuple<std::vector<Course *>, std::vector<std::vector<Course *>>,
            std::vector<std::vector<std::vector<Course *>>>>
 User::getRemainingPrereqs(Course *course) {
-    auto [required, choices, allPathways] = course->getAllPrereqs();
+    auto [requiredReqs, choiceReqs, seriesReqs] = course->getAllPrereqs();
     for (Course *taken : m_takenCourses) {
-        for (Course *&req : required) {
+        for (Course *&req : requiredReqs) {
             // Remove the class if it's been found
             if (taken == req) {
-                std::swap(req, required.back());
-                required.pop_back();
+                std::swap(req, requiredReqs.back());
+                requiredReqs.pop_back();
                 break;
             }
         }
-        for (std::vector<Course *> &choice : choices) {
+        for (std::vector<Course *> &choice : choiceReqs) {
             bool found = false;
             for (Course *&option : choice) {
                 if (taken == option) {
@@ -96,32 +97,32 @@ User::getRemainingPrereqs(Course *course) {
             // If the class is one of the choices, remove that choice (since it
             // has been satisfied)
             if (found) {
-                std::swap(choice, choices.back());
-                choices.pop_back();
+                std::swap(choice, choiceReqs.back());
+                choiceReqs.pop_back();
                 break;
             }
         }
-        for (std::vector<std::vector<Course *>> &pathways : allPathways) {
-            for (std::vector<Course *> &pathway : pathways) {
-                for (Course *&option : pathway) {
+        for (std::vector<std::vector<Course *>> &seriesReq : seriesReqs) {
+            for (std::vector<Course *> &series : seriesReq) {
+                for (Course *&option : series) {
                     if (taken == option) {
-                        std::swap(option, pathway.back());
-                        pathway.pop_back();
+                        std::swap(option, series.back());
+                        series.pop_back();
                         break;
                     }
                 }
-                if (pathway.empty()) {
-                    swap(pathway, pathways.back());
-                    pathways.pop_back();
+                if (series.empty()) {
+                    swap(series, seriesReq.back());
+                    seriesReq.pop_back();
                 }
             }
-            if (pathways.empty()) {
-                swap(pathways, allPathways.back());
-                allPathways.pop_back();
+            if (seriesReq.empty()) {
+                swap(seriesReq, seriesReqs.back());
+                seriesReqs.pop_back();
             }
         }
     }
-    return {required, choices, allPathways};
+    return {requiredReqs, choiceReqs, seriesReqs};
 }
 
 /* bool User::hasAllPrereqs(Course *course) {
